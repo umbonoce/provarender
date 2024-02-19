@@ -9,3 +9,4 @@ reportlab>=3.6.12
 protobuf-decoder>=0.2.0
 iOSbackup>=0.9.925
 bleach>=6.1.0
+waitress>=3.0.0
