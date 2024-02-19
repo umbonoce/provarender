@@ -1,7 +1,7 @@
 import os
 import sys
-import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
-#import Service    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
+import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib import colors

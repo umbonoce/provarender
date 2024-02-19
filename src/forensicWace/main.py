@@ -1,17 +1,17 @@
 import webbrowser
-import forensicWace.ExtractInformation as ExtractInformation    # Comment this to develop on local. Add to create package to download and install pip
-#import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.ExtractInformation as ExtractInformation    # Comment this to develop on local. Add to create package to download and install pip
+import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
 import os
 import sys
 
-import forensicWace.GenerateReport as GenerateReport    # Comment this to develop on local. Add to create package to download and install pip
-#import GenerateReport    # Uncomment this to develop on local. Add to create package to download and install pip
-import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
-#import Service    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.GenerateReport as GenerateReport    # Comment this to develop on local. Add to create package to download and install pip
+import GenerateReport    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
+import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 import flask
 import tkinter as tk
-import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
-#import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
+import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, render_template, redirect, url_for, request
 from tkinter import filedialog

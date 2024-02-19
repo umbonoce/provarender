@@ -1,7 +1,7 @@
 import os
 import sqlite3
-import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
-#import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
+import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 import subprocess
 import shutil
 

@@ -5,11 +5,11 @@ import binascii
 import rfc3161ng
 import vobject
 import iOSbackup
-import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
-#import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
+#import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
+import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from iOSbackup import iOSbackup
-from protobuf_decoder.protobuf_decoder import Parser
+#from protobuf_decoder.protobuf_decoder import Parser
 from datetime import datetime, timezone
 
 basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
