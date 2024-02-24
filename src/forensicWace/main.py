@@ -434,11 +434,11 @@ def main():
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
 
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080)
-    webbrowser.open('http://localhost:5000')  # Disable for development Mode
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
+    # webbrowser.open('http://localhost:5000')  # Disable for development Mode
     #app.run(debug=True, use_reloader=True)      # Enable for development Mode
-    app.run(use_reloader=True)  # Disable for development Mode
+    #app.run(use_reloader=True)  # Disable for development Mode
 
 if __name__ == '__main__':
     main()
