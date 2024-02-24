@@ -4,7 +4,6 @@ import sqlite3
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 import subprocess
 import shutil
-
 from tkinter import messagebox
 from pathlib import Path
 
