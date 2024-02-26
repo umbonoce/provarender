@@ -49,7 +49,7 @@ def Home():
 @app.route('/inputPath')
 def InputPath():
 
-    #rootIn = tk.Tk()
+    rootIn = tk.Tk()
     # Create a hidden root window
     #rootIn.attributes('-alpha', 0.0)  # Make it transparent
     #rootIn.attributes('-topmost', 1)  # Put it on top of other windows
