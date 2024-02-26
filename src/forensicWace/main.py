@@ -49,6 +49,11 @@ def Home():
 @app.route('/inputPath')
 def InputPath():
 
+    #rootIn = tk.Tk()
+    # Create a hidden root window
+    #rootIn.attributes('-alpha', 0.0)  # Make it transparent
+    #rootIn.attributes('-topmost', 1)  # Put it on top of other windows
+
     global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError
 
     InputPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
@@ -63,6 +68,7 @@ def InputPath():
         noDbError = 0
         noOutPathError = 0
 
+    #rootIn.destroy()
 
     return redirect(url_for('Home'))
 
@@ -436,7 +442,7 @@ def main():
 
     from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
-    # webbrowser.open('http://localhost:5000')  # Disable for development Mode
+    #webbrowser.open('http://localhost:5000')  # Disable for development Mode
     #app.run(debug=True, use_reloader=True)      # Enable for development Mode
     #app.run(use_reloader=True)  # Disable for development Mode
 
