@@ -9,12 +9,12 @@ import GenerateReport    # Uncomment this to develop on local. Add to create pac
 #import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
 import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 import flask
-import tkinter as tk
+#import tkinter as tk
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, render_template, redirect, url_for, request
-from tkinter import filedialog
+#from tkinter import filedialog
 
 app = Flask(__name__ , static_folder='assets')
 
@@ -49,14 +49,14 @@ def Home():
 @app.route('/inputPath')
 def InputPath():
 
-    rootIn = tk.Tk()
+    # rootIn = tk.Tk()
     # Create a hidden root window
-    rootIn.attributes('-alpha', 0.0)  # Make it transparent
-    rootIn.attributes('-topmost', 1)  # Put it on top of other windows
+    #rootIn.attributes('-alpha', 0.0)  # Make it transparent
+    #rootIn.attributes('-topmost', 1)  # Put it on top of other windows
 
     global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError
 
-    InputPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
+    #InputPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
     if InputPath == "":
         InputPath = GlobalConstant.noDatabaseSelected
     else:
@@ -68,20 +68,20 @@ def InputPath():
         noDbError = 0
         noOutPathError = 0
 
-    rootIn.destroy()
+    #rootIn.destroy()
 
     return redirect(url_for('Home'))
 
 @app.route('/outputPath')
 def OutputPath():
 
-    rootOut = tk.Tk()
+    #rootOut = tk.Tk()
     # Create a hidden root window
-    rootOut.attributes('-alpha', 0.0)  # Make it transparent
-    rootOut.attributes('-topmost', 1)  # Put it on top of other windows
+    #rootOut.attributes('-alpha', 0.0)  # Make it transparent
+    #rootOut.attributes('-topmost', 1)  # Put it on top of other windows
 
     global InputPath, OutputPath, noOutPathError
-    OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
+    #OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
 
     if OutputPath == "":
         OutputPath = InputPath.rsplit('/', 1)[0] + '/'
@@ -90,7 +90,7 @@ def OutputPath():
 
     noOutPathError = 0
 
-    rootOut.destroy()
+    #rootOut.destroy()
 
     return redirect(url_for('Home'))
 
@@ -226,16 +226,16 @@ def CheckReport():
 def ReportPath():
     global noDbError
 
-    rootReportPath = tk.Tk()
+    #rootReportPath = tk.Tk()
     # Create a hidden root window
-    rootReportPath.attributes('-alpha', 0.0)  # Make it transparent
-    rootReportPath.attributes('-topmost', 1)  # Put it on top of other windows
+    #rootReportPath.attributes('-alpha', 0.0)  # Make it transparent
+    #rootReportPath.attributes('-topmost', 1)  # Put it on top of other windows
 
     global ReportPath
 
-    ReportPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
+    #ReportPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
 
-    rootReportPath.destroy()
+    #rootReportPath.destroy()
 
     if ReportPath == "":
         ReportPath= GlobalConstant.noReportSelected
@@ -246,16 +246,16 @@ def ReportPath():
 def CertificatePath():
     global noDbError
 
-    rootCertrPath = tk.Tk()
+    #rootCertrPath = tk.Tk()
     # Create a hidden root window
-    rootCertrPath.attributes('-alpha', 0.0)  # Make it transparent
-    rootCertrPath.attributes('-topmost', 1)  # Put it on top of other windows
+    #rootCertrPath.attributes('-alpha', 0.0)  # Make it transparent
+    #rootCertrPath.attributes('-topmost', 1)  # Put it on top of other windows
 
     global CertificatePath
 
-    CertificatePath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
+    #CertificatePath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
 
-    rootCertrPath.destroy()
+    #rootCertrPath.destroy()
 
     if CertificatePath == "":
         CertificatePath= GlobalConstant.noCertificateSelected
@@ -360,13 +360,13 @@ def ExtractEncryptedBackup(deviceSn, udid):
 @app.route('/ExtractionOutPath')
 def ExtractionOutPath():
 
-    rootOut = tk.Tk()
+    #rootOut = tk.Tk()
     # Create a hidden root window
-    rootOut.attributes('-alpha', 0.0)  # Make it transparent
-    rootOut.attributes('-topmost', 1)  # Put it on top of other windows
+    #rootOut.attributes('-alpha', 0.0)  # Make it transparent
+    #rootOut.attributes('-topmost', 1)  # Put it on top of other windows
 
     global InputPath, OutputPath, noOutPathError
-    OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
+    #OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
 
     if OutputPath == "":
         OutputPath = InputPath.rsplit('/', 1)[0] + '/'
@@ -375,7 +375,7 @@ def ExtractionOutPath():
 
     noOutPathError = 0
 
-    rootOut.destroy()
+    #rootOut.destroy()
 
     return redirect(url_for('AvailableBackups'))
 
@@ -439,10 +439,11 @@ def Exit():
 def main():
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
-
-    webbrowser.open('http://localhost:5000')  # Disable for development Mode
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
+    #webbrowser.open('http://localhost:5000')  # Disable for development Mode
     #app.run(debug=True, use_reloader=True)      # Enable for development Mode
-    app.run(use_reloader=True)  # Disable for development Mode
+    #app.run(use_reloader=True)  # Disable for development Mode
 
 if __name__ == '__main__':
     main()
