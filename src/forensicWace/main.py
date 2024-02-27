@@ -9,12 +9,12 @@ import GenerateReport    # Uncomment this to develop on local. Add to create pac
 #import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
 import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 import flask
-import _tkinter as tk
+import tkinter as tk
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, render_template, redirect, url_for, request
-from _tkinter import filedialog
+from tkinter import filedialog
 
 app = Flask(__name__ , static_folder='assets')
 

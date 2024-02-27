@@ -5,7 +5,7 @@ import GlobalConstant    # Uncomment this to develop on local. Add to create pac
 import subprocess
 import shutil
 
-from _tkinter import messagebox
+from tkinter import messagebox
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
