@@ -5,7 +5,7 @@ import GlobalConstant    # Uncomment this to develop on local. Add to create pac
 import subprocess
 import shutil
 
-#from tkinter import messagebox
+from _tkinter import messagebox
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
@@ -18,8 +18,7 @@ def ExecuteQuery(inputPath,query):
 
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
     except Exception as error:
-        cursor = conn.cursor()
-        #messagebox.showerror("ERRORE!", "L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
+        messagebox.showerror("ERRORE!", "L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
 
     conn.close()
 
@@ -27,8 +26,7 @@ def ExecuteQuery(inputPath,query):
 
 def GetChatList(inputPath):
     if inputPath == "":
-        #messagebox.showerror("ERROR!", "Select a database first")
-        query = GlobalConstant.queryChatList
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryChatList
 
@@ -37,7 +35,7 @@ def GetChatList(inputPath):
 
 def GetGpsData(inputPath):
     if inputPath == "":
-        query = GlobalConstant.queryGpsData
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryGpsData
 
@@ -47,7 +45,7 @@ def GetGpsData(inputPath):
 
 def GetBlockedContacts(inputPath):
     if inputPath == "":
-        query = GlobalConstant.queryGpsData
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryBlockedContacts
 
@@ -57,7 +55,7 @@ def GetBlockedContacts(inputPath):
 
 def GetPrivateChat(inputPath, mediaType, phoneNumber):
     if inputPath == "":
-        query = GlobalConstant.queryGpsData
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryPrivateChatCountersPT1 + phoneNumber + GlobalConstant.queryPrivateChatCountersPT2
 
@@ -88,7 +86,7 @@ def GetPrivateChat(inputPath, mediaType, phoneNumber):
 
 def GetGroupChat(inputPath, mediaType, groupName):
     if inputPath == "":
-        query = GlobalConstant.queryGpsData
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryGroupChatCountersPT1 + groupName + GlobalConstant.queryGroupChatCountersPT2
 
@@ -123,7 +121,7 @@ def GetGroupChat(inputPath, mediaType, groupName):
 
 def GetGroupList(inputPath):
     if inputPath == "":
-        query = GlobalConstant.queryGpsData
+        messagebox.showerror("ERROR!", "Select a database first")
     else:
         query = GlobalConstant.queryGroupList
         extractedData = ExecuteQuery(inputPath, query)

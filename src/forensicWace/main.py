@@ -9,12 +9,12 @@ import GenerateReport    # Uncomment this to develop on local. Add to create pac
 #import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
 import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 import flask
-import tkinter as tk
+import _tkinter as tk
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, render_template, redirect, url_for, request
-from tkinter import filedialog
+from _tkinter import filedialog
 
 app = Flask(__name__ , static_folder='assets')
 
@@ -440,11 +440,9 @@ def main():
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
 
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
-    #webbrowser.open('http://localhost:5000')  # Disable for development Mode
+    webbrowser.open('http://localhost:5000')  # Disable for development Mode
     #app.run(debug=True, use_reloader=True)      # Enable for development Mode
-    #app.run(use_reloader=True)  # Disable for development Mode
+    app.run(use_reloader=True)  # Disable for development Mode
 
 if __name__ == '__main__':
     main()
