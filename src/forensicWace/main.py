@@ -38,7 +38,7 @@ backupPath = GlobalConstant.backupDefaultPath
 phoneNumber = ""
 
 ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = 'C:\\Users\\u.nocerino\\Documents\\GitHub\\ForensicWace'
+UPLOAD_FOLDER = '\\'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
