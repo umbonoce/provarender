@@ -39,7 +39,15 @@
                                 <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Database file path</span></div>
                                 <div class="text-dark fw-bold h5 mb-0"><span>{{ inputPath }}</span></div>
                             </div>
-                            <div class="col-auto"><a class="btn btn-primary btn-circle ms-1" href="/inputPath" role="button"><i class="fas fa-folder-open text-white"></i></a></div>
+                            <div class="col-auto">
+                                <form action="/inputPath" method="POST"
+                                      enctype="multipart/form-data">
+                                    <label for="myInputFile">
+                                        <a class="btn btn-primary btn-circle ms-1"><i class="fas fa-folder-open text-white"></i></a>
+                                        <input id="myInputFile" style="display:none" onchange="form.submit()" type="file" name="file" />
+                                    </label>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

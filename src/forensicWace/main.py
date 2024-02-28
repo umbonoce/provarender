@@ -13,8 +13,9 @@ import tkinter as tk
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, flash, render_template, redirect, url_for, request
 from tkinter import filedialog
+import werkzeug
 
 app = Flask(__name__ , static_folder='assets')
 
@@ -38,6 +39,14 @@ backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 
+ALLOWED_EXTENSIONS = {'sqlite'}
+UPLOAD_FOLDER = 'C:\\Users\\u.nocerino\\Documents\\GitHub\\ForensicWace'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/')
 def Home():
     global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, ReportPath, CertificatePath, reportStatus
@@ -46,31 +55,38 @@ def Home():
     reportStatus = 0
     return render_template('index.html', inputPath=InputPath, outputPath=OutputPath, fileName=fileName, fileSize=fileSize, dbSha256=dbSha256, dbMd5=dbMd5, noDbError=noDbError, noOutPathError=noOutPathError)
 
-@app.route('/inputPath')
+@app.route('/inputPath', methods = ['GET', 'POST'])
 def InputPath():
-
-    rootIn = tk.Tk()
-    # Create a hidden root window
-    rootIn.attributes('-alpha', 0.0)  # Make it transparent
-    rootIn.attributes('-topmost', 1)  # Put it on top of other windows
-
     global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError
 
-    InputPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
-    if InputPath == "":
-        InputPath = GlobalConstant.noDatabaseSelected
-    else:
-        OutputPath = InputPath.rsplit('/', 1)[0] + '/'
-        fileName = InputPath[InputPath.rfind('/') + 1:]
-        fileSize = str(round(Service.GetFileSize(InputPath), 1)) + " MB"
-        dbSha256 = Service.CalculateSHA256(InputPath)
-        dbMd5 = Service.CalculateMD5(InputPath)
-        noDbError = 0
-        noOutPathError = 0
-
-    rootIn.destroy()
-
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        
+        f = request.files['file']
+        if f.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if f and allowed_file(f.filename):
+            filename = werkzeug.utils.secure_filename(f.filename)
+            if filename == "":
+                filename = GlobalConstant.noDatabaseSelected
+            else:
+                InputPath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], InputPath))
+                OutputPath = InputPath.rsplit('/', 1)[0] + '/'
+                fileName = InputPath[InputPath.rfind('/') + 1:]
+                fileSize = str(round(Service.GetFileSize(InputPath), 1)) + " MB"
+                dbSha256 = Service.CalculateSHA256(InputPath)
+                dbMd5 = Service.CalculateMD5(InputPath)
+                noDbError = 0
+                noOutPathError = 0
     return redirect(url_for('Home'))
+
+    #InputPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
+    #rootIn.destroy()
+
 
 @app.route('/outputPath')
 def OutputPath():
@@ -437,6 +453,7 @@ def Exit():
     return redirect(url_for('Home'))
 
 def main():
+    app.secret_key = 'super secret key'
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
 
