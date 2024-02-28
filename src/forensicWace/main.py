@@ -13,7 +13,6 @@ import flask
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, flash, render_template, redirect, url_for, request
-from tkinter import filedialog
 import werkzeug
 
 app = Flask(__name__ , static_folder='assets')

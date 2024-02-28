@@ -64,17 +64,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/forensicWace/main.py</url>
-          <line>58</line>
+          <line>57</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/forensicWace/main.py</url>
-          <line>43</line>
+          <line>42</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/forensicWace/main.py</url>
-          <line>71</line>
+          <line>70</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
