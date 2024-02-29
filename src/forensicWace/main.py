@@ -38,7 +38,7 @@ backupPath = GlobalConstant.backupDefaultPath
 phoneNumber = ""
 
 ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = '\\'
+UPLOAD_FOLDER = '//data'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -69,7 +69,7 @@ def InputPath():
         if f and allowed_file(f.filename):
             filename = werkzeug.utils.secure_filename(f.filename)
             if filename == "":
-                filename = GlobalConstant.noDatabaseSelected
+                InputPath = GlobalConstant.noDatabaseSelected
             else:
                 InputPath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], InputPath))
