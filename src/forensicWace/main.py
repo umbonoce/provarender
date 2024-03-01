@@ -9,20 +9,22 @@ import GenerateReport    # Uncomment this to develop on local. Add to create pac
 #import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
 import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 import flask
+#import tkinter as tk
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
-from flask import Flask, flash, render_template, redirect, url_for, request
-import werkzeug
+from flask import Flask, render_template, session, redirect, url_for, request
+#from tkinter import filedialog
 
 app = Flask(__name__ , static_folder='assets')
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-InputPath = ""
-OutputPath = ""
-fileName = GlobalConstant.noDatabaseSelected
-fileSize = GlobalConstant.noDatabaseSelected
-dbSha256 = GlobalConstant.noDatabaseSelected
-dbMd5 = GlobalConstant.noDatabaseSelected
+session['inputPath'] = ""
+session['outputPath'] = ""
+session['fileName'] = GlobalConstant.noDatabaseSelected
+session['fileSize'] = GlobalConstant.noDatabaseSelected
+session['dbSha256'] = GlobalConstant.noDatabaseSelected
+session['dbMd5']  = GlobalConstant.noDatabaseSelected
 noDbError = 1
 noOutPathError = 1
 extractionDone = 1
@@ -37,49 +39,38 @@ backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 
-ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = '//data'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @app.route('/')
 def Home():
-    global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, ReportPath, CertificatePath, reportStatus
+    global InputPath, OutputPath, fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, ReportPath, CertificatePath, reportStatus
     ReportPath = GlobalConstant.noReportSelected
     CertificatePath = GlobalConstant.noCertificateSelected
     reportStatus = 0
-    return render_template('index.html', inputPath=InputPath, outputPath=OutputPath, fileName=fileName, fileSize=fileSize, dbSha256=dbSha256, dbMd5=dbMd5, noDbError=noDbError, noOutPathError=noOutPathError)
+    return render_template('index.html', inputPath=InputPath, outputPath=OutputPath, fileName=fileName, fileSize=fileSize, dbSha256=dbSha256, session['dbMd5'] =session['dbMd5'] , noDbError=noDbError, noOutPathError=noOutPathError)
 
-@app.route('/inputPath', methods = ['GET', 'POST'])
+@app.route('/inputPath')
 def InputPath():
-    global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError
 
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        
-        f = request.files['file']
-        if f.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if f and allowed_file(f.filename):
-            filename = werkzeug.utils.secure_filename(f.filename)
-            if filename == "":
-                InputPath = GlobalConstant.noDatabaseSelected
-            else:
-                InputPath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                f.save(os.path.join(app.config['UPLOAD_FOLDER'], InputPath))
-                OutputPath = InputPath.rsplit('/', 1)[0] + '/'
-                fileName = InputPath[InputPath.rfind('/') + 1:]
-                fileSize = str(round(Service.GetFileSize(InputPath), 1)) + " MB"
-                dbSha256 = Service.CalculateSHA256(InputPath)
-                dbMd5 = Service.CalculateMD5(InputPath)
-                noDbError = 0
-                noOutPathError = 0
+    # rootIn = tk.Tk()
+    # Create a hidden root window
+    #rootIn.attributes('-alpha', 0.0)  # Make it transparent
+    #rootIn.attributes('-topmost', 1)  # Put it on top of other windows
+
+    global InputPath, OutputPath, fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, noOutPathError
+
+    #session['inputPath'] = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
+    if session['inputPath'] == "":
+        session['inputPath'] = GlobalConstant.noDatabaseSelected
+    else:
+        session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
+        session['fileName'] = InputPath[InputPath.rfind('/') + 1:]
+        session['fileSize'] = str(round(Service.GetFileSize(InputPath), 1)) + " MB"
+        session['dbSha256'] = Service.CalculateSHA256(InputPath)
+        session['dbMd5']  = Service.CalculateMD5(InputPath)
+        noDbError = 0
+        noOutPathError = 0
+
+    #rootIn.destroy()
+
     return redirect(url_for('Home'))
 
 @app.route('/outputPath')
@@ -91,12 +82,12 @@ def OutputPath():
     #rootOut.attributes('-topmost', 1)  # Put it on top of other windows
 
     global InputPath, OutputPath, noOutPathError
-    #OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
+    #session['outputPath'] = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
 
-    if OutputPath == "":
-        OutputPath = InputPath.rsplit('/', 1)[0] + '/'
+    if session['outputPath'] == "":
+        session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
     else:
-        OutputPath = OutputPath + '/'
+        session['outputPath'] = session['outputPath'] + '/'
 
     noOutPathError = 0
 
@@ -376,12 +367,12 @@ def ExtractionOutPath():
     #rootOut.attributes('-topmost', 1)  # Put it on top of other windows
 
     global InputPath, OutputPath, noOutPathError
-    #OutputPath = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
+    #session['outputPath'] = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
 
-    if OutputPath == "":
-        OutputPath = InputPath.rsplit('/', 1)[0] + '/'
+    if session['outputPath'] == "":
+        session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
     else:
-        OutputPath = OutputPath + '/'
+        session['outputPath'] = session['outputPath'] + '/'
 
     noOutPathError = 0
 
@@ -421,8 +412,8 @@ def About():
 
 def SetGlobalInOutVar(valueIn, valueOut):
     global InputPath, OutputPath
-    InputPath = valueIn
-    OutputPath = valueOut
+    session['inputPath'] = valueIn
+    session['outputPath'] = valueOut
 
 def SetGlobalCheckReportVar(valueRep, valueCert):
     global ReportPath, CertificatePath
@@ -431,12 +422,12 @@ def SetGlobalCheckReportVar(valueRep, valueCert):
 
 @app.route('/exit')
 def Exit():
-    global fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError, phoneNumber
+    global fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, noOutPathError, phoneNumber
 
-    fileName = GlobalConstant.noDatabaseSelected
-    fileSize = GlobalConstant.noDatabaseSelected
-    dbSha256 = GlobalConstant.noDatabaseSelected
-    dbMd5 = GlobalConstant.noDatabaseSelected
+    session['fileName'] = GlobalConstant.noDatabaseSelected
+    session['fileSize'] = GlobalConstant.noDatabaseSelected
+    session['dbSha256'] = GlobalConstant.noDatabaseSelected
+    session['dbMd5']  = GlobalConstant.noDatabaseSelected
     noDbError = 1
     noOutPathError = 1
 
@@ -450,7 +441,7 @@ def main():
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     from waitress import serve
-    serve(app,  listen='0.0.0.0:8080 [::]:9090 *:6543')
+    serve(app, host="0.0.0.0", port=8080)
     #webbrowser.open('http://localhost:5000')  # Disable for development Mode
     #app.run(debug=True, use_reloader=True)      # Enable for development Mode
     #app.run(use_reloader=True)  # Disable for development Mode
