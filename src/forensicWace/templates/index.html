@@ -31,15 +31,15 @@
     <div id="wrapper" class="d-flex flex-column">
 
         <div class="row" style="margin-right: calc(var(--bs-gutter-x));margin-left: calc(var(--bs-gutter-x));margin-bottom: calc(var(--bs-gutter-x) * .5);">
-            <div class="col">
+            <div class="col-md-4">
                 <div class="card shadow border-start-primary py-2">
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Database file path</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span>{{ inputPath }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span style="font-size: 10px;">{{ inputPath }}</span></div>
                             </div>
-                            <div class="col-auto">
+                            <div class="col-md-2">
                                 <form action="/inputPath" method="POST"
                                       enctype="multipart/form-data">
                                     <label for="myInputFile">
@@ -52,7 +52,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-4">
                 {% if noDbError == 1 %}
                 <div class="card shadow border-start-success py-2" style="opacity: 0.5; pointer-events: none;">
                 {% elif noDbError == 0 %}
@@ -60,16 +60,16 @@
                 {% endif %}
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-success fw-bold text-xs mb-1"><span>Database name</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span>{{ fileName }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span>{{ fileName }}</span></div>
                             </div>
                             <div class="col-auto"><a class="btn btn-success btn-circle ms-1" role="button"><i class="fas fa-database text-white"></i></a></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-4">
                 {% if noDbError == 1 %}
                 <div class="card shadow border-start-success py-2" style="opacity: 0.5; pointer-events: none;">
                 {% elif noDbError == 0 %}
@@ -77,9 +77,9 @@
                 {% endif %}
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-warning fw-bold text-xs mb-1"><span>Database File size</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span>{{ fileSize }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span>{{ fileSize }}</span></div>
                             </div>
                             <div class="col-auto"><a class="btn btn-warning btn-circle ms-1" role="button"><i class="fas fa-info text-white"></i></a></div>
                         </div>
@@ -88,20 +88,28 @@
             </div>
         </div>
         <div class="row" style="margin-right: calc(var(--bs-gutter-x));margin-left: calc(var(--bs-gutter-x));">
-            <div class="col">
+            <div class="col-md-4">
                 <div class="card shadow border-start-success py-2">
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Output file path</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span>{{ outputPath }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span style="font-size: 10px;">{{ outputPath }}</span></div>
                             </div>
-                            <div class="col-auto"><a class="btn btn-primary btn-circle ms-1" href="/outputPath" role="button"><i class="fas fa-folder-open text-white"></i></a></div>
+                            <div class="col-auto">
+                                <form action="/outputPath" method="POST"
+                                      enctype="multipart/form-data">
+                                    <label for="myOutputFolder">
+                                        <a class="btn btn-primary btn-circle ms-1"><i class="fas fa-folder-open text-white"></i></a>
+                                        <input id="myOutputFolder" style="display:none" onchange="form.submit()" type="file" webkitdirectory />
+                                    </label>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-4">
                 {% if noDbError == 1 %}
                 <div class="card shadow border-start-success py-2" style="opacity: 0.5; pointer-events: none;">
                 {% elif noDbError == 0 %}
@@ -109,16 +117,16 @@
                 {% endif %}
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-success fw-bold text-xs mb-1"><span style="color: var(--bs-info);">Database SHA256 Hash</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span style="font-size: 10px;">{{ dbSha256 }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span style="font-size: 10px;">{{ dbSha256 }}</span></div>
                             </div>
                             <div class="col-auto"><a class="btn btn-success btn-circle ms-1" role="button" style="background: var(--bs-info);"><i class="fas fa-hashtag text-white"></i></a></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-4">
                 {% if noDbError == 1 %}
                 <div class="card shadow border-start-success py-2" style="opacity: 0.5; pointer-events: none;">
                 {% elif noDbError == 0 %}
@@ -126,9 +134,9 @@
                 {% endif %}
                     <div class="card-body">
                         <div class="row align-items-center no-gutters">
-                            <div class="col me-2">
+                            <div class="col-md-10">
                                 <div class="text-uppercase text-success fw-bold text-xs mb-1"><span style="color: var(--bs-info);">Database MD5 Hash</span></div>
-                                <div class="text-dark fw-bold h5 mb-0"><span style="font-size: 10px;">{{ dbMd5 }}</span></div>
+                                <div class="text-dark fw-bold mb-0"><span style="font-size: 10px;">{{ dbMd5 }}</span></div>
                             </div>
                             <div class="col-auto"><a class="btn btn-success btn-circle ms-1" role="button" style="background: var(--bs-info);"><i class="fas fa-hashtag text-white"></i></a></div>
                         </div>

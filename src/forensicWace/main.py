@@ -13,21 +13,13 @@ import werkzeug
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-noDbError = 1
-noOutPathError = 1
-extractionDone = 1
-
 extractedDataList = None
-
-ReportPath = GlobalConstant.noReportSelected
-CertificatePath = GlobalConstant.noCertificateSelected
-reportStatus = 0
 
 backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = '//data'
+UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -36,20 +28,21 @@ def allowed_file(filename):
 
 @app.route('/')
 def Home():
-   
-    if 'fileName' in session:
+
+    if 'fileName' not in session:
         session['inputPath'] = GlobalConstant.noDatabaseSelected
         session['outputPath'] = GlobalConstant.noDatabaseSelected
         session['fileName'] = GlobalConstant.noDatabaseSelected
         session['fileSize'] = GlobalConstant.noDatabaseSelected
         session['dbSha256'] = GlobalConstant.noDatabaseSelected
-        session['dbMd5']  = GlobalConstant.noDatabaseSelected
-        
-    ReportPath = GlobalConstant.noReportSelected
-    CertificatePath = GlobalConstant.noCertificateSelected
-    reportStatus = 0
-   
-    return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'] , noDbError=noDbError, noOutPathError=noOutPathError)
+        session['dbMd5']  = GlobalConstant.noDatabaseSelected     
+        session['reportPath'] = GlobalConstant.noReportSelected
+        session['certificatePath']  = GlobalConstant.noCertificateSelected
+        session['reportStatus']  = 0
+        session['noDbError']  = 1  
+        session['noOutPathError']  = 1  
+
+    return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
 @app.route('/inputPath', methods = ['GET', 'POST'])
 def InputPath():
@@ -71,27 +64,25 @@ def InputPath():
             else:
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 f.save(session['inputPath'])
-                session['outputPath'] = session['inputPath'].rsplit('/', 1)[0] + '/'
-                session['fileName'] = session['inputPath'][session['inputPath'].rfind('/') + 1:]
+                session['outputPath'] = UPLOAD_FOLDER
+                session['fileName'] = session['inputPath'].split('\\')[-1]
                 session['fileSize'] = str(round(Service.GetFileSize(session['inputPath']), 1)) + " MB"
                 session['dbSha256'] = Service.CalculateSHA256(session['inputPath'])
                 session['dbMd5']  = Service.CalculateMD5(session['inputPath'])
-                noDbError = 0
-                noOutPathError = 0
+                session['noDbError']  = 0
+                session['noOutPathError']  = 0
 
     return redirect(url_for('Home'))
 
-@app.route('/outputPath')
+@app.route('/outputPath', methods = ['GET', 'POST'])
 def OutputPath():
 
-    global InputPath, OutputPath, noOutPathError
-
     if session['outputPath'] == "":
-        session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
+        session['outputPath'] = session['inputPath'] .rsplit('/', 1)[0] + '/'
     else:
         session['outputPath'] = session['outputPath'] + '/'
 
-    noOutPathError = 0
+    session['noOutPathError']  = 0
 
     return redirect(url_for('Home'))
 
@@ -99,8 +90,8 @@ def OutputPath():
 def BlockedContact():
     global noDbError, InputPath, extractedDataList
 
-    if noDbError != 1:
-        extractedDataList = ExtractInformation.GetBlockedContacts(InputPath)
+    if session['noDbError']  != 1:
+        extractedDataList = ExtractInformation.GetBlockedContacts(session['inputPath'])
         return render_template('blockedContact.html', blockedContactsData=extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -109,8 +100,8 @@ def BlockedContact():
 def BlockedContactReport():
     global noDbError, OutputPath, fileName, extractedDataList
 
-    if noDbError != 1:
-        GenerateReport.BlockedContactReport(OutputPath, fileName, extractedDataList)
+    if session['noDbError']  != 1:
+        GenerateReport.BlockedContactReport(UPLOAD_FOLDER, fileName, extractedDataList)
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -119,8 +110,8 @@ def BlockedContactReport():
 def GroupList():
     global noDbError, InputPath, extractedDataList
 
-    if noDbError != 1:
-        extractedDataList = ExtractInformation.GetGroupList(InputPath)
+    if session['noDbError']  != 1:
+        extractedDataList = ExtractInformation.GetGroupList(session['inputPath'])
         return render_template('groupList.html', chatListData = extractedDataList)
     else:
         return redirect(url_for('Home'))
@@ -129,8 +120,8 @@ def GroupList():
 def SelectGroup():
     global noDbError, InputPath, extractedDataList
 
-    if noDbError != 1:
-        extractedDataList = ExtractInformation.GetGroupList(InputPath)
+    if session['noDbError']  != 1:
+        extractedDataList = ExtractInformation.GetGroupList(session['inputPath'])
         return render_template('selectGroup.html', chatListData = extractedDataList)
     else:
         return redirect(url_for('Home'))
@@ -139,9 +130,9 @@ def SelectGroup():
 def GroupListReport():
     global noDbError, OutputPath, fileName, extractedDataList
 
-    if noDbError != 1:
+    if session['noDbError']  != 1:
         global InputPath
-        GenerateReport.GroupListReport(OutputPath, fileName, extractedDataList)
+        GenerateReport.GroupListReport(UPLOAD_FOLDER, fileName, extractedDataList)
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -150,8 +141,8 @@ def GroupListReport():
 def ChatList():
     global noDbError, InputPath, extractedDataList
 
-    if noDbError != 1:
-        extractedDataList = ExtractInformation.GetChatList(InputPath)
+    if session['noDbError']  != 1:
+        extractedDataList = ExtractInformation.GetChatList(session['inputPath'])
         return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -159,8 +150,8 @@ def ChatList():
 @app.route('/gpsLocation')
 def GpsLocation():
     global noDbError, InputPath, extractedDataList
-    if noDbError != 1:
-        extractedDataList = ExtractInformation.GetGpsData(InputPath)
+    if session['noDbError']  != 1:
+        extractedDataList = ExtractInformation.GetGpsData(session['inputPath'])
         return render_template('gpsLocation.html', gpsData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -169,8 +160,8 @@ def GpsLocation():
 def GpsLocationReport():
     global noDbError, OutputPath, fileName, extractedDataList
 
-    if noDbError != 1:
-        GenerateReport.GpsLocations(OutputPath, fileName, extractedDataList)
+    if session['noDbError']  != 1:
+        GenerateReport.GpsLocations(UPLOAD_FOLDER, fileName, extractedDataList)
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -179,7 +170,7 @@ def GpsLocationReport():
 def InsertPhoneNumber():
     global phoneNumber
 
-    if noDbError != 1:
+    if session['noDbError']  != 1:
 
         if request.method == "POST":
             if request.form["button"] == "del":
@@ -195,8 +186,8 @@ def InsertPhoneNumber():
 def PrivateChat(mediaType, phoneNumber):
     global noDbError, InputPath
 
-    if noDbError != 1:
-        counters, messages = ExtractInformation.GetPrivateChat(InputPath, mediaType, phoneNumber)
+    if session['noDbError']  != 1:
+        counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], mediaType, phoneNumber)
         return render_template('privateChat.html', phoneNumber=Service.FormatPhoneNumber(phoneNumber), nonFormattedNumber = phoneNumber, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, originalPhoneNumber = phoneNumber, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, GetUserProfilePicImage = Service.GetUserProfilePicImage)
     else:
         return redirect(url_for('Home'))
@@ -205,8 +196,8 @@ def PrivateChat(mediaType, phoneNumber):
 def GroupChat(mediaType, groupName):
     global noDbError, InputPath
 
-    if noDbError != 1:
-        counters, groupId, messages = ExtractInformation.GetGroupChat(InputPath, mediaType, groupName)
+    if session['noDbError']  != 1:
+        counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], mediaType, groupName)
 
         return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage)
     else:
@@ -216,8 +207,8 @@ def GroupChat(mediaType, groupName):
 def CheckReport():
     global ReportPath, CertificatePath, reportStatus, noDbError
 
-    if (ReportPath != GlobalConstant.noReportSelected and CertificatePath != GlobalConstant.noCertificateSelected):
-        reportStatus = Service.ReportCheckAuth(ReportPath, CertificatePath)
+    if (session['reportPath'] != GlobalConstant.noReportSelected and session['certificatePath']  != GlobalConstant.noCertificateSelected):
+        session['reportStatus']  = Service.ReportCheckAuth(ReportPath, CertificatePath)
 
     return render_template('checkReport.html', reportPath=ReportPath, certificatePath=CertificatePath, reportStatus=reportStatus)
 
@@ -226,10 +217,10 @@ def ReportPath():
     global noDbError
     global ReportPath
 
-    #ReportPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
+    #session['reportPath'] = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
     #rootReportPath.destroy()
 
-    if ReportPath == "":
+    if session['reportPath'] == "":
         ReportPath= GlobalConstant.noReportSelected
 
     return redirect(url_for('CheckReport'))
@@ -239,10 +230,10 @@ def CertificatePath():
     global noDbError
     global CertificatePath
 
-    #CertificatePath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
+    #session['certificatePath']  = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
     #rootCertrPath.destroy()
 
-    if CertificatePath == "":
+    if session['certificatePath']  == "":
         CertificatePath= GlobalConstant.noCertificateSelected
 
     return redirect(url_for('CheckReport'))
@@ -251,7 +242,7 @@ def CertificatePath():
 def CalculateDbHash():
     global noDbError
 
-    if noDbError != 1:
+    if session['noDbError']  != 1:
         global InputPath
         GenerateReport.DbHash(InputPath, OutputPath, fileName)
         return redirect(url_for('Home'))
@@ -262,7 +253,7 @@ def CalculateDbHash():
 def ChatListReport():
     global noDbError, OutputPath, fileName, extractedDataList
 
-    if noDbError != 1:
+    if session['noDbError']  != 1:
         global InputPath
         GenerateReport.ChatListReport(OutputPath, fileName, extractedDataList)
         return redirect(url_for('Home'))
@@ -286,7 +277,7 @@ def ExtractBackup(deviceSn, udid):
     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
     backupPath = backupPath.replace("\\", "/")
 
-    if noOutPathError == 0:
+    if session['noOutPathError']  == 0:
         backupList = Service.GetAvailableBackups()
         ExtractInformation.ExtractFullBackup(backupPath, udid, OutputPath)
         Service.RemoveFileWithoutExtension()
@@ -308,7 +299,7 @@ def ExtractBackup(deviceSn, udid):
 @app.route('/insertPassword/<deviceSn>/<udid>')
 def InsertPassword(deviceSn, udid):
     global extractionDone
-    extractionDone = 0
+    session['extractionDone '] = 0
     return render_template('insertPassword.html', deviceSn=deviceSn, udid=udid)
 
 @app.route('/extractEncryptedBackup/<deviceSn>/<udid>', methods=["POST"])
@@ -318,13 +309,13 @@ def ExtractEncryptedBackup(deviceSn, udid):
     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
     backupPath = backupPath.replace("\\", "/")
 
-    if noOutPathError == 0:
+    if session['noOutPathError']  == 0:
         backupList = Service.GetAvailableBackups()
-        if request.method == "POST" and extractionDone == 0:
+        if request.method == "POST" and session['extractionDone '] == 0:
             backupPsw = request.form["password"]
             ExtractInformation.ExtractEncryptedFullBackup(backupPath, udid, OutputPath, backupPsw)
             Service.RemoveFileWithoutExtension()
-            extractionDone = 1
+            session['extractionDone '] = 1
         else:
             return redirect(url_for('AvailableBackups'))
 
@@ -353,7 +344,7 @@ def ExtractionOutPath():
     else:
         session['outputPath'] = session['outputPath'] + '/'
 
-    noOutPathError = 0
+    session['noOutPathError']  = 0
 
     return redirect(url_for('AvailableBackups'))
 
@@ -395,18 +386,20 @@ def SetGlobalInOutVar(valueIn, valueOut):
 def SetGlobalCheckReportVar(valueRep, valueCert):
     global ReportPath, CertificatePath
     ReportPath = valueRep
-    CertificatePath = valueCert
+    CertificatePath  = valueCert
 
 @app.route('/exit')
 def Exit():
     global fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError, phoneNumber
-
+    
+    session['inputPath'] = GlobalConstant.noDatabaseSelected
+    session['outputPath'] = GlobalConstant.noDatabaseSelected
     session['fileName'] = GlobalConstant.noDatabaseSelected
     session['fileSize'] = GlobalConstant.noDatabaseSelected
     session['dbSha256'] = GlobalConstant.noDatabaseSelected
     session['dbMd5']  = GlobalConstant.noDatabaseSelected
-    noDbError = 1
-    noOutPathError = 1
+    session['noDbError']  = 1
+    session['noOutPathError']  = 1
 
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
