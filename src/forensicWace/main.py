@@ -66,7 +66,7 @@ def InputPath():
                 session['inputPath'] = GlobalConstant.noDatabaseSelected
             else:
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                f.save(os.path.join(app.config['UPLOAD_FOLDER'], session['inputPath']))
+                f.save(session['inputPath'])
                 session['outputPath'] = session['inputPath'].rsplit('/', 1)[0] + '/'
                 session['fileName'] = session['inputPath'][session['inputPath'].rfind('/') + 1:]
                 session['fileSize'] = str(round(Service.GetFileSize(session['inputPath']), 1)) + " MB"
@@ -179,10 +179,8 @@ def InsertPhoneNumber():
 
         if request.method == "POST":
             if request.form["button"] == "del":
-                # Delete last character inserted
                 phoneNumber = phoneNumber[:-1]
             else:
-                # Add selected character to the list
                 phoneNumber += request.form["button"]
 
         return render_template("inputPhoneNumber.html", phoneNumber=phoneNumber)
@@ -222,16 +220,9 @@ def CheckReport():
 @app.route('/reportPath')
 def ReportPath():
     global noDbError
-
-    #rootReportPath = tk.Tk()
-    # Create a hidden root window
-    #rootReportPath.attributes('-alpha', 0.0)  # Make it transparent
-    #rootReportPath.attributes('-topmost', 1)  # Put it on top of other windows
-
     global ReportPath
 
     #ReportPath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
-
     #rootReportPath.destroy()
 
     if ReportPath == "":
@@ -242,16 +233,9 @@ def ReportPath():
 @app.route('/certificatePath')
 def CertificatePath():
     global noDbError
-
-    #rootCertrPath = tk.Tk()
-    # Create a hidden root window
-    #rootCertrPath.attributes('-alpha', 0.0)  # Make it transparent
-    #rootCertrPath.attributes('-topmost', 1)  # Put it on top of other windows
-
     global CertificatePath
 
     #CertificatePath = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
-
     #rootCertrPath.destroy()
 
     if CertificatePath == "":
@@ -431,7 +415,7 @@ def main():
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     
     from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+    serve(app,  listen='0.0.0.0:8080 [::]:9090 *:6543')
     
     # webbrowser.open('http://localhost:5000') 
     # app.run(debug=True, use_reloader=True)     
