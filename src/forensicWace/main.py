@@ -41,11 +41,11 @@ phoneNumber = ""
 
 @app.route('/')
 def Home():
-    global InputPath, OutputPath, fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, ReportPath, CertificatePath, reportStatus
+    global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5 , noDbError, ReportPath, CertificatePath, reportStatus
     ReportPath = GlobalConstant.noReportSelected
     CertificatePath = GlobalConstant.noCertificateSelected
     reportStatus = 0
-    return render_template('index.html', inputPath=InputPath, outputPath=OutputPath, fileName=fileName, fileSize=fileSize, dbSha256=dbSha256, session['dbMd5'] =session['dbMd5'] , noDbError=noDbError, noOutPathError=noOutPathError)
+    return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'] , noDbError=noDbError, noOutPathError=noOutPathError)
 
 @app.route('/inputPath')
 def InputPath():
@@ -55,7 +55,7 @@ def InputPath():
     #rootIn.attributes('-alpha', 0.0)  # Make it transparent
     #rootIn.attributes('-topmost', 1)  # Put it on top of other windows
 
-    global InputPath, OutputPath, fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, noOutPathError
+    global InputPath, OutputPath, fileName, fileSize, dbSha256, dbMd5 , noDbError, noOutPathError
 
     #session['inputPath'] = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Database", "*.sqlite"), ("All files", "*.*")))
     if session['inputPath'] == "":
@@ -422,7 +422,7 @@ def SetGlobalCheckReportVar(valueRep, valueCert):
 
 @app.route('/exit')
 def Exit():
-    global fileName, fileSize, dbSha256, session['dbMd5'] , noDbError, noOutPathError, phoneNumber
+    global fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError, phoneNumber
 
     session['fileName'] = GlobalConstant.noDatabaseSelected
     session['fileSize'] = GlobalConstant.noDatabaseSelected
