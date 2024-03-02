@@ -27,7 +27,7 @@ backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = 'data'
+UPLOAD_FOLDER = '//data'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
