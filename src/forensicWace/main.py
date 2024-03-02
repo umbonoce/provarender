@@ -415,7 +415,7 @@ def main():
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     
     from waitress import serve
-    serve(app,  listen='0.0.0.0:8080 [::]:9090 *:6543')
+    serve(app, host="0.0.0.0", port=8080)
     
     # webbrowser.open('http://localhost:5000') 
     # app.run(debug=True, use_reloader=True)     
