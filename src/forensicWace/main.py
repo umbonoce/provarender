@@ -36,15 +36,19 @@ def allowed_file(filename):
 
 @app.route('/')
 def Home():
-    session['inputPath'] = GlobalConstant.noDatabaseSelected
-    session['outputPath'] = GlobalConstant.noDatabaseSelected
-    session['fileName'] = GlobalConstant.noDatabaseSelected
-    session['fileSize'] = GlobalConstant.noDatabaseSelected
-    session['dbSha256'] = GlobalConstant.noDatabaseSelected
-    session['dbMd5']  = GlobalConstant.noDatabaseSelected
+   
+    if 'fileName' in session:
+        session['inputPath'] = GlobalConstant.noDatabaseSelected
+        session['outputPath'] = GlobalConstant.noDatabaseSelected
+        session['fileName'] = GlobalConstant.noDatabaseSelected
+        session['fileSize'] = GlobalConstant.noDatabaseSelected
+        session['dbSha256'] = GlobalConstant.noDatabaseSelected
+        session['dbMd5']  = GlobalConstant.noDatabaseSelected
+        
     ReportPath = GlobalConstant.noReportSelected
     CertificatePath = GlobalConstant.noCertificateSelected
     reportStatus = 0
+   
     return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'] , noDbError=noDbError, noOutPathError=noOutPathError)
 
 @app.route('/inputPath', methods = ['GET', 'POST'])
