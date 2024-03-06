@@ -8,12 +8,11 @@ import flask
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from flask import Flask, flash, render_template, session, redirect, url_for, request
+from datetime import timedelta
 import werkzeug
 
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
-extractedDataList = None
 
 backupPath = GlobalConstant.backupDefaultPath
 
@@ -29,6 +28,9 @@ def allowed_file(filename):
 @app.route('/')
 def Home():
 
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
+    
     if 'fileName' not in session:
         session['inputPath'] = GlobalConstant.noDatabaseSelected
         session['outputPath'] = GlobalConstant.noDatabaseSelected
@@ -40,7 +42,8 @@ def Home():
         session['certificatePath']  = GlobalConstant.noCertificateSelected
         session['reportStatus']  = 0
         session['noDbError']  = 1  
-        session['noOutPathError']  = 1  
+        session['noOutPathError']  = 1
+        session['extractedDataList']  = None
 
     return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
@@ -91,77 +94,73 @@ def BlockedContact():
     global noDbError, InputPath, extractedDataList
 
     if session['noDbError']  != 1:
-        extractedDataList = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        return render_template('blockedContact.html', blockedContactsData=extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
+        session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
+        return render_template('blockedContact.html', blockedContactsData=session['extractedDataList'], formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
 @app.route('/blockedContactReport')
 def BlockedContactReport():
-    global noDbError, OutputPath, fileName, extractedDataList
 
     if session['noDbError']  != 1:
-        GenerateReport.BlockedContactReport(UPLOAD_FOLDER, fileName, extractedDataList)
+        session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
+        GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
 
 @app.route('/groupList')
 def GroupList():
-    global noDbError, InputPath, extractedDataList
 
     if session['noDbError']  != 1:
-        extractedDataList = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('groupList.html', chatListData = extractedDataList)
+        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
+        return render_template('groupList.html', chatListData = session['extractedDataList'])
     else:
         return redirect(url_for('Home'))
 
 @app.route('/selectGroup')
 def SelectGroup():
-    global noDbError, InputPath, extractedDataList
 
     if session['noDbError']  != 1:
-        extractedDataList = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('selectGroup.html', chatListData = extractedDataList)
+        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
+        return render_template('selectGroup.html', chatListData = session['extractedDataList'])
     else:
         return redirect(url_for('Home'))
 
 @app.route('/groupListReport')
 def GroupListReport():
-    global noDbError, OutputPath, fileName, extractedDataList
 
     if session['noDbError']  != 1:
-        global InputPath
-        GenerateReport.GroupListReport(UPLOAD_FOLDER, fileName, extractedDataList)
+        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
+        GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
 
 @app.route('/chatList')
 def ChatList():
-    global noDbError, InputPath, extractedDataList
 
     if session['noDbError']  != 1:
-        extractedDataList = ExtractInformation.GetChatList(session['inputPath'])
-        return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
+        session['extractedDataList']  = ExtractInformation.GetChatList(session['inputPath'])
+        return render_template('chatList.html', chatListData = session['extractedDataList'], formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
 @app.route('/gpsLocation')
 def GpsLocation():
-    global noDbError, InputPath, extractedDataList
+
     if session['noDbError']  != 1:
-        extractedDataList = ExtractInformation.GetGpsData(session['inputPath'])
-        return render_template('gpsLocation.html', gpsData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
+        session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
+        return render_template('gpsLocation.html', gpsData = session['extractedDataList'], formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
 @app.route('/gpsLocationReport')
 def GpsLocationReport():
-    global noDbError, OutputPath, fileName, extractedDataList
 
     if session['noDbError']  != 1:
-        GenerateReport.GpsLocations(UPLOAD_FOLDER, fileName, extractedDataList)
+        session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
+        GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -184,7 +183,6 @@ def InsertPhoneNumber():
 
 @app.route('/privateChat/<mediaType>/<phoneNumber>')
 def PrivateChat(mediaType, phoneNumber):
-    global noDbError, InputPath
 
     if session['noDbError']  != 1:
         counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], mediaType, phoneNumber)
@@ -194,7 +192,6 @@ def PrivateChat(mediaType, phoneNumber):
 
 @app.route('/groupChat/<mediaType>/<groupName>')
 def GroupChat(mediaType, groupName):
-    global noDbError, InputPath
 
     if session['noDbError']  != 1:
         counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], mediaType, groupName)
@@ -205,64 +202,56 @@ def GroupChat(mediaType, groupName):
 
 @app.route('/checkReport')
 def CheckReport():
-    global ReportPath, CertificatePath, reportStatus, noDbError
+    global CertificatePath
 
     if (session['reportPath'] != GlobalConstant.noReportSelected and session['certificatePath']  != GlobalConstant.noCertificateSelected):
         session['reportStatus']  = Service.ReportCheckAuth(ReportPath, CertificatePath)
 
-    return render_template('checkReport.html', reportPath=ReportPath, certificatePath=CertificatePath, reportStatus=reportStatus)
+    return render_template('checkReport.html', reportPath=session['reportPath'], certificatePath=session['certificatePath'], reportStatus=session['reportStatus'])
 
 @app.route('/reportPath')
 def ReportPath():
-    global noDbError
-    global ReportPath
 
     #session['reportPath'] = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
     #rootReportPath.destroy()
 
     if session['reportPath'] == "":
-        ReportPath= GlobalConstant.noReportSelected
+        session['reportPath'] = GlobalConstant.noReportSelected
 
     return redirect(url_for('CheckReport'))
 
 @app.route('/certificatePath')
 def CertificatePath():
-    global noDbError
-    global CertificatePath
 
     #session['certificatePath']  = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
     #rootCertrPath.destroy()
 
     if session['certificatePath']  == "":
-        CertificatePath= GlobalConstant.noCertificateSelected
+        session['certificatePath'] = GlobalConstant.noCertificateSelected
 
     return redirect(url_for('CheckReport'))
 
 @app.route('/calculateDbHash')
 def CalculateDbHash():
-    global noDbError
 
     if session['noDbError']  != 1:
         global InputPath
-        GenerateReport.DbHash(InputPath, OutputPath, fileName)
+        GenerateReport.DbHash(session['inputPath'], session['outputPath'], session['fileName'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
 
 @app.route('/chatListReport')
 def ChatListReport():
-    global noDbError, OutputPath, fileName, extractedDataList
 
     if session['noDbError']  != 1:
-        global InputPath
-        GenerateReport.ChatListReport(OutputPath, fileName, extractedDataList)
+        GenerateReport.ChatListReport(session['outputPath'], session['fileName'], session['extractedDataList'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
 
 @app.route('/availableBackups')
 def AvailableBackups():
-    global noOutPathError, backupPath, noOutPathError
 
     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
     backupPath = backupPath.replace("\\", "/")
@@ -272,7 +261,6 @@ def AvailableBackups():
 
 @app.route('/extractBackup/<deviceSn>/<udid>')
 def ExtractBackup(deviceSn, udid):
-    global noOutPathError, backupPath, OutputPath, noOutPathError
 
     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
     backupPath = backupPath.replace("\\", "/")
@@ -298,13 +286,11 @@ def ExtractBackup(deviceSn, udid):
 
 @app.route('/insertPassword/<deviceSn>/<udid>')
 def InsertPassword(deviceSn, udid):
-    global extractionDone
     session['extractionDone '] = 0
     return render_template('insertPassword.html', deviceSn=deviceSn, udid=udid)
 
 @app.route('/extractEncryptedBackup/<deviceSn>/<udid>', methods=["POST"])
 def ExtractEncryptedBackup(deviceSn, udid):
-    global noOutPathError, backupPath, OutputPath, noOutPathError, extractionDone
 
     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
     backupPath = backupPath.replace("\\", "/")
@@ -336,7 +322,6 @@ def ExtractEncryptedBackup(deviceSn, udid):
 @app.route('/ExtractionOutPath')
 def ExtractionOutPath():
 
-    global InputPath, OutputPath, noOutPathError
     #session['outputPath'] = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
 
     if session['outputPath'] == "":
@@ -350,7 +335,6 @@ def ExtractionOutPath():
 
 @app.route('/generetePrivateChatReport/<phoneNumber>')
 def GeneretePrivateChatReport(phoneNumber):
-    global InputPath, OutputPath, fileName
 
     counters, messages = ExtractInformation.GetPrivateChat(InputPath, '0', phoneNumber)
     GenerateReport.PrivateChatReport(OutputPath, phoneNumber, messages)
@@ -362,8 +346,6 @@ def GeneretePrivateChatReport(phoneNumber):
 
 @app.route('/genereteGroupChatReport/<groupName>')
 def GenereteGroupChatReport(groupName):
-    global InputPath, OutputPath, fileName
-
     counters, groupId, messages = ExtractInformation.GetGroupChat(InputPath, '0', groupName)
     GenerateReport.GroupChatReport(OutputPath, groupName, messages)
     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
@@ -390,7 +372,6 @@ def SetGlobalCheckReportVar(valueRep, valueCert):
 
 @app.route('/exit')
 def Exit():
-    global fileName, fileSize, dbSha256, dbMd5, noDbError, noOutPathError, phoneNumber
     
     session['inputPath'] = GlobalConstant.noDatabaseSelected
     session['outputPath'] = GlobalConstant.noDatabaseSelected
