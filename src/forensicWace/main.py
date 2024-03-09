@@ -7,7 +7,7 @@ import Service    # Uncomment this to develop on local. Add to create package to
 import flask
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
-from flask import Flask, flash, render_template, session, redirect, url_for, request
+from flask import Flask, flash, render_template, send_from_directory, session, redirect, url_for, request
 from datetime import timedelta
 import werkzeug
 
@@ -104,8 +104,8 @@ def BlockedContactReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return redirect(url_for('Home'))
+        outputFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        return send_from_directory(UPLOAD_FOLDER, outputFile)
     else:
         return redirect(url_for('Home'))
 
