@@ -91,7 +91,6 @@ def OutputPath():
 
 @app.route('/blockedContact')
 def BlockedContact():
-    global noDbError, InputPath, extractedDataList
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
