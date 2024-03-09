@@ -2,6 +2,7 @@ import re
 import os
 import hashlib
 import binascii
+import sys
 import rfc3161ng
 import vobject
 import iOSbackup
@@ -12,7 +13,7 @@ from iOSbackup import iOSbackup
 from protobuf_decoder.protobuf_decoder import Parser
 from datetime import datetime, timezone
 
-basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
+basePath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
 
 def FormatPhoneNumber(phoneumber):
     if phoneumber.isdigit():
@@ -61,7 +62,8 @@ def CalculateMD5(filePath):
         return hashMD5.hexdigest()
 
 def CertificateReport(reportPath):
-    certificate = open(basePath + "/src/tsa.crt", 'rb').read()
+    certificatePath = os.path.join(basePath, 'tsa.crt')
+    certificate = open(certificatePath, 'rb').read()
 
     # create the object
     rt = rfc3161ng.RemoteTimestamper("https://freetsa.org/tsr", certificate=certificate, hashname='sha256')
@@ -74,7 +76,8 @@ def CertificateReport(reportPath):
         f.write(timestamp)
 
 def ReportCheckAuth(pathFile, pathCert):
-        certificate = open(basePath + "/src/tsa.crt", 'rb').read()
+        certificatePath = os.path.join(basePath, 'tsa.crt')
+        certificate = open(certificatePath, 'rb').read()
         rt = rfc3161ng.RemoteTimestamper("https://freetsa.org/tsr", certificate=certificate, hashname='sha256')
 
         timestamp = open(pathCert, 'rb').read()

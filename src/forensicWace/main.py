@@ -17,13 +17,13 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
-ALLOWED_EXTENSIONS = {'sqlite'}
+
 UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def allowed_file(filename):
+def allowed_file(filename, formato):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in formato
 
 @app.route('/')
 def Home():
@@ -60,7 +60,7 @@ def InputPath():
         if f.filename == '':
             flash('No selected file')
             return redirect(request.url)
-        if f and allowed_file(f.filename):
+        if f and allowed_file(f.filename, {'sqlite'}):
             filename = werkzeug.utils.secure_filename(f.filename)
             if filename == "":
                 session['inputPath'] = GlobalConstant.noDatabaseSelected
@@ -205,29 +205,48 @@ def CheckReport():
     global CertificatePath
 
     if (session['reportPath'] != GlobalConstant.noReportSelected and session['certificatePath']  != GlobalConstant.noCertificateSelected):
-        session['reportStatus']  = Service.ReportCheckAuth(ReportPath, CertificatePath)
+        session['reportStatus']  = Service.ReportCheckAuth(session['reportPath'], session['certificatePath'])
 
     return render_template('checkReport.html', reportPath=session['reportPath'], certificatePath=session['certificatePath'], reportStatus=session['reportStatus'])
 
-@app.route('/reportPath')
+@app.route('/reportPath', methods = ['GET', 'POST'])
 def ReportPath():
 
-    #session['reportPath'] = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("PDF", "*.pdf"), ("All files", "*.*")))
-    #rootReportPath.destroy()
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
 
-    if session['reportPath'] == "":
-        session['reportPath'] = GlobalConstant.noReportSelected
+        f = request.files['file']
+        
+        if f and allowed_file(f.filename, {'pdf'}):
+            filename = werkzeug.utils.secure_filename(f.filename)
+            if filename == "":
+                session['reportPath'] = GlobalConstant.noDatabaseSelected
+            else:
+                session['reportPath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(session['reportPath'])       
+
 
     return redirect(url_for('CheckReport'))
 
-@app.route('/certificatePath')
+@app.route('/certificatePath', methods = ['GET', 'POST'])
 def CertificatePath():
 
-    #session['certificatePath']  = filedialog.askopenfilename(title=GlobalConstant.selectWaDatabase, filetypes=(("Certificate", "*.tsr"), ("All files", "*.*")))
-    #rootCertrPath.destroy()
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
 
-    if session['certificatePath']  == "":
-        session['certificatePath'] = GlobalConstant.noCertificateSelected
+        f = request.files['file']
+        
+        if f and allowed_file(f.filename, {'tsr'}):
+            filename = werkzeug.utils.secure_filename(f.filename)
+            if filename == "":
+                session['certificatePath'] = GlobalConstant.noDatabaseSelected
+            else:
+                session['certificatePath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(session['certificatePath'])
 
     return redirect(url_for('CheckReport'))
 
@@ -397,7 +416,6 @@ def main():
     
     # webbrowser.open('http://localhost:5000') 
     # app.run(debug=True, use_reloader=True)     
-    # app.run(use_reloader=True) 
 
 if __name__ == '__main__':
     main()

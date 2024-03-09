@@ -37,7 +37,7 @@ def ChatListReport(outputPath, fileName, extractedDataList):
         data.append([extractedData["Contact"], extractedData["UserName"],
                      Service.FormatPhoneNumber(extractedData["PhoneNumber"]), extractedData["NumberOfMessages"], extractedData["MessageDate"]])
 
-    outFileName = outputPath + fileName + "-ChatList.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-ChatList.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=A4)
@@ -89,7 +89,7 @@ def ChatListReport(outputPath, fileName, extractedDataList):
 
 def PrivateChatReport(outputPath, phoneNumber, extractedData):
 
-    outFileName = outputPath + phoneNumber + "-Chat.pdf"
+    outFileName = os.path.join(outputPath, phoneNumber + "-Chat.pdf")
 
     # Define pages margins
     left_margin = 50
@@ -440,7 +440,7 @@ def BlockedContactReport(outputPath, fileName, extractedDataList):
             extractedData["Name"] = "Not Available"
         data.append([extractedData["Name"], Service.FormatPhoneNumber(extractedData["PhoneNumber"])])
 
-    outFileName = outputPath + fileName + "-BlockedContacts.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-BlockedContacts.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=A4)
@@ -501,7 +501,7 @@ def GroupListReport(outputPath, fileName, extractedDataList):
             extractedData["Is_muted"] = "Disabled"
         data.append([extractedData["Group_Name"], extractedData["Message_Date"], extractedData["Number_of_Messages"], extractedData["Is_muted"]])
 
-    outFileName = outputPath + fileName + "-GroupList.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-GroupList.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=A4)
@@ -556,7 +556,7 @@ def GroupChatReport(outputPath, groupName, extractedData):
     words = groupName.split()
     groupNameNoSpaces = ''.join(words)
 
-    outFileName = outputPath + groupNameNoSpaces + "-Chat.pdf"
+    outFileName = os.path.join(outputPath, groupNameNoSpaces + "-Chat.pdf")
 
     # Define pages margins
     left_margin = 50
