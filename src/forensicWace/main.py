@@ -131,8 +131,8 @@ def GroupListReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return redirect(url_for('Home'))
+        outputFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        return send_from_directory(UPLOAD_FOLDER, outputFile)
     else:
         return redirect(url_for('Home'))
 

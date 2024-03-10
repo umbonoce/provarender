@@ -549,6 +549,7 @@ def GroupListReport(outputPath, fileName, extractedDataList):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
+        return outFileName
     else:
         print("Errore: il file PDF non è stato creato.")
 
