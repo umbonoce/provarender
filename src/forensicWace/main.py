@@ -1,3 +1,4 @@
+from io import BytesIO
 import webbrowser
 import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
 import os
@@ -133,12 +134,15 @@ def GroupListReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
         outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        
-        with ZipFile("groupListReportExtraction.zip", "w") as newzip:
+        memory_file = BytesIO()
+
+        with ZipFile(memory_file, "w") as newzip:
             newzip.write(outputFile)
             newzip.write(certificateFile)
+        
+        memory_file.seek(0)
 
-        return send_file(newzip, mimetype='application/zip', as_attachment=True, download_name="groupListReportExtraction")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, attachment_filename="groupListReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
