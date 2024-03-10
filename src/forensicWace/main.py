@@ -7,7 +7,7 @@ import Service    # Uncomment this to develop on local. Add to create package to
 import flask
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 
-from flask import Flask, flash, render_template, send_from_directory, session, redirect, url_for, request
+from flask import Flask, flash, render_template, send_file, send_from_directory, session, redirect, url_for, request
 from datetime import timedelta
 import werkzeug
 
@@ -98,13 +98,13 @@ def BlockedContact():
     else:
         return redirect(url_for('Home'))
 
-@app.route('/blockedContactReport')
+@app.route('/blockedContactReport', methods = ['GET', 'POST'])
 def BlockedContactReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
         outputFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_from_directory(UPLOAD_FOLDER, outputFile)
+        return send_file(outputFile, as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
@@ -132,7 +132,7 @@ def GroupListReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
         outputFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_from_directory(UPLOAD_FOLDER, outputFile)
+        return send_file(outputFile, as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
@@ -159,8 +159,8 @@ def GpsLocationReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
-        GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return redirect(url_for('Home'))
+        outputFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        return send_file(outputFile, as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
