@@ -9,6 +9,7 @@ import GlobalConstant    # Uncomment this to develop on local. Add to create pac
 
 from flask import Flask, flash, render_template, send_file, send_from_directory, session, redirect, url_for, request
 from datetime import timedelta
+from zipfile import ZipFile
 import werkzeug
 
 app = Flask(__name__ , static_folder='assets')
@@ -132,7 +133,12 @@ def GroupListReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
         outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file([outputFile, certificateFile], as_attachment=True)
+        
+        with ZipFile("groupListReportExtraction.zip", "w") as newzip:
+            newzip.write(outputFile)
+            newzip.write(certificateFile)
+
+        return send_file(newzip, as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
