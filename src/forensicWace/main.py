@@ -142,7 +142,7 @@ def GroupListReport():
         
         memory_file.seek(0)
 
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, attachment_filename="groupListReportExtraction.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="groupListReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
