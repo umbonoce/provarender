@@ -126,7 +126,7 @@ def SelectGroup():
     else:
         return redirect(url_for('Home'))
 
-@app.route('/groupListReport')
+@app.route('/groupListReport', methods = ['GET', 'POST'])
 def GroupListReport():
 
     if session['noDbError']  != 1:
