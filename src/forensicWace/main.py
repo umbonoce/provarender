@@ -132,7 +132,7 @@ def GroupListReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
         outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file(outputFile, as_attachment=True), send_file(certificateFile, as_attachment=True)
+        return send_file([outputFile, certificateFile], as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
