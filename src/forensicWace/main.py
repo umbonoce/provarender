@@ -138,7 +138,7 @@ def GroupListReport():
             newzip.write(outputFile)
             newzip.write(certificateFile)
 
-        return send_file(newzip, as_attachment=True)
+        return send_file(newzip, mimetype='application/zip', as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
