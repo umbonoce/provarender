@@ -473,7 +473,7 @@ def BlockedContactReport(outputPath, fileName, extractedDataList):
     # Scrittura del documento
     doc.build(fileElements, onFirstPage=CreateVerticalDocHeaderAndFooter, onLaterPages=CreateVerticalDocHeaderAndFooter)
 
-    Service.CertificateReport(outFileName)
+    certificateFile = Service.CertificateReport(outFileName)
 
     # Verifica l'esistenza del file PDF appena creato.
     # SE esiste lo apre automaticamente
@@ -488,7 +488,7 @@ def BlockedContactReport(outputPath, fileName, extractedDataList):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
-        return outFileName
+        return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")
 
@@ -535,7 +535,7 @@ def GroupListReport(outputPath, fileName, extractedDataList):
     # Scrittura del documento
     doc.build(fileElements, onFirstPage=CreateVerticalDocHeaderAndFooter, onLaterPages=CreateVerticalDocHeaderAndFooter)
 
-    Service.CertificateReport(outFileName)
+    certificateFile = Service.CertificateReport(outFileName)
 
     # Verifica l'esistenza del file PDF appena creato.
     # SE esiste lo apre automaticamente
@@ -550,7 +550,7 @@ def GroupListReport(outputPath, fileName, extractedDataList):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
-        return outFileName
+        return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")
 

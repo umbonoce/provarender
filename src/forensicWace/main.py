@@ -104,7 +104,7 @@ def BlockedContactReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
         outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file(outputFile, as_attachment=True), send_file(certificateFile, as_attachment=True)
+        return send_file([outputFile, certificateFile], as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
@@ -160,7 +160,7 @@ def GpsLocationReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
         outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file(outputFile, as_attachment=True), send_file(certificateFile, as_attachment=True)
+        return send_file([outputFile, certificateFile], as_attachment=True)
     else:
         return redirect(url_for('Home'))
 
