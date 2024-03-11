@@ -9,16 +9,14 @@ import shutil
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
-    
-    extractedData = []
-    # Connessione al database
+        # Connessione al database
     conn = sqlite3.connect(inputPath)
 
     try:
         with conn.cursor() as cursor:
             results = cursor.execute(query)
-
-            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
+            rows = cursor.fetchmany(size=10)
+            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
         
     except Exception as error:
         conn = sqlite3.connect(inputPath)
