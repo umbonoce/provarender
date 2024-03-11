@@ -106,7 +106,15 @@ def BlockedContactReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
         outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file([outputFile, certificateFile], as_attachment=True)
+        memory_file = BytesIO()
+
+        with ZipFile(memory_file, "w") as newzip:
+            newzip.write(outputFile, os.path.basename(outputFile))
+            newzip.write(certificateFile, os.path.basename(certificateFile))
+        
+        memory_file.seek(0)
+
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="blockedContacReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -170,7 +178,14 @@ def GpsLocationReport():
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
         outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
-        return send_file([outputFile, certificateFile], as_attachment=True)
+        memory_file = BytesIO()
+
+        with ZipFile(memory_file, "w") as newzip:
+            newzip.write(outputFile, os.path.basename(outputFile))
+            newzip.write(certificateFile, os.path.basename(certificateFile))
+        
+        memory_file.seek(0)
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="gpsLocationReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -273,8 +288,15 @@ def CalculateDbHash():
 def ChatListReport():
 
     if session['noDbError']  != 1:
-        GenerateReport.ChatListReport(session['outputPath'], session['fileName'], session['extractedDataList'])
-        return redirect(url_for('Home'))
+        outputFile, certificateFile = GenerateReport.ChatListReport(session['outputPath'], session['fileName'], session['extractedDataList'])
+        memory_file = BytesIO()
+
+        with ZipFile(memory_file, "w") as newzip:
+            newzip.write(outputFile, os.path.basename(outputFile))
+            newzip.write(certificateFile, os.path.basename(certificateFile))
+        
+        memory_file.seek(0)
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="chatListReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 

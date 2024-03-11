@@ -71,7 +71,7 @@ def CertificateReport(reportPath):
     # file to be certificated
     with open(reportPath, 'rb') as f:
         timestamp = rt.timestamp(data=f.read())
-    certificatePath = reportPath.replace('.pdf', '.tsr"') 
+    certificatePath = reportPath.replace('.pdf', '.tsr') 
     
     with open(certificatePath, 'wb') as f:
         f.write(timestamp)
