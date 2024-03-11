@@ -95,7 +95,8 @@ def OutputPath():
 def BlockedContact():
 
     if session['noDbError']  != 1:
-        extractedDataList  = ExtractInformation.GetBlockedContacts(session['inputPath'])
+        inputPath = session['inputPath']
+        extractedDataList  = ExtractInformation.GetBlockedContacts(inputPath)
         return render_template('blockedContact.html', extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -158,7 +159,8 @@ def GroupListReport():
 def ChatList():
 
     if session['noDbError']  != 1:
-        extractedDataList  = ExtractInformation.GetChatList(session['inputPath'])
+        inputPath = session['inputPath']
+        extractedDataList  = ExtractInformation.GetChatList(inputPath)
         return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
