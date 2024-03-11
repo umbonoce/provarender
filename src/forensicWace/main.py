@@ -95,8 +95,8 @@ def OutputPath():
 def BlockedContact():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        return render_template('blockedContact.html', blockedContactsData=session['extractedDataList'], formatPhoneNumber=Service.FormatPhoneNumber)
+        extractedDataList  = ExtractInformation.GetBlockedContacts(session['inputPath'])
+        return render_template('blockedContact.html', extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -158,8 +158,8 @@ def GroupListReport():
 def ChatList():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetChatList(session['inputPath'])
-        return render_template('chatList.html', chatListData = session['extractedDataList'], formatPhoneNumber = Service.FormatPhoneNumber)
+        extractedDataList  = ExtractInformation.GetChatList(session['inputPath'])
+        return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -167,8 +167,8 @@ def ChatList():
 def GpsLocation():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
-        return render_template('gpsLocation.html', gpsData = session['extractedDataList'], formatPhoneNumber = Service.FormatPhoneNumber)
+        extractedDataList  = ExtractInformation.GetGpsData(session['inputPath'])
+        return render_template('gpsLocation.html', gpsData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
