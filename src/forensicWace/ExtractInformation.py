@@ -17,9 +17,8 @@ def ExecuteQuery(inputPath,query):
     try:
         with conn.cursor() as cursor:
             results = cursor.execute(query)
-            rows = cursor.fetchall()
 
-            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
         
     except Exception as error:
         conn = sqlite3.connect(inputPath)
