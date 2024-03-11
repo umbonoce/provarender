@@ -17,12 +17,13 @@ def ExecuteQuery(inputPath,query):
         results = cursor.execute(query)
 
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
+        
+        return extractedData
     except Exception as error:
         conn = sqlite3.connect(inputPath)
 
     conn.close()
 
-    return extractedData
 
 def GetChatList(inputPath):
     if inputPath == "":
