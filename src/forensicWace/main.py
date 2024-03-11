@@ -137,8 +137,8 @@ def GroupListReport():
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
-            newzip.write(outputFile)
-            newzip.write(certificateFile)
+            newzip.write(outputFile, os.path.basename(outputFile))
+            newzip.write(certificateFile, os.path.basename(certificateFile))
         
         memory_file.seek(0)
 
