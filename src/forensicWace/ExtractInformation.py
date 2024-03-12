@@ -1,5 +1,7 @@
 import os
 import sqlite3
+
+from flask import flash
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
 import subprocess
@@ -14,14 +16,11 @@ def ExecuteQuery(inputPath,query):
         with sqlite3.connect(inputPath) as connection:        
             with connection.cursor() as cursor:
                 results = cursor.execute(query)
-                rows = cursor.fetchmany(size=10)
-                extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+                extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
                 connection.close()
                 return extractedData
     except Exception as error:
-        conn = sqlite3.connect(inputPath)
-
-
+        flash("ERRORE! L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
 
 
 def GetChatList(inputPath):
