@@ -11,18 +11,16 @@ from pathlib import Path
 def ExecuteQuery(inputPath,query):
 
     try:
-        # Connessione al database
-        conn = sqlite3.connect(inputPath)        
-        with conn.cursor() as cursor:
-            results = cursor.execute(query)
-            rows = cursor.fetchmany(size=10)
-            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
-            return extractedData
+        with sqlite3.connect(inputPath) as connection:        
+            with connection.cursor() as cursor:
+                results = cursor.execute(query)
+                rows = cursor.fetchmany(size=10)
+                extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+                connection.close()
+                return extractedData
     except Exception as error:
         conn = sqlite3.connect(inputPath)
-    finally:
-        if conn.is_connected():
-            conn.close()
+
 
 
 
