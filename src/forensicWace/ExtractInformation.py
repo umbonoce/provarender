@@ -9,20 +9,20 @@ import shutil
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
-        # Connessione al database
-    conn = sqlite3.connect(inputPath)
 
     try:
+        # Connessione al database
+        conn = sqlite3.connect(inputPath)        
         with conn.cursor() as cursor:
             results = cursor.execute(query)
             rows = cursor.fetchmany(size=10)
-        
+            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+            return extractedData
     except Exception as error:
         conn = sqlite3.connect(inputPath)
     finally:
-        extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
-        conn.close()
-        return extractedData
+        if conn.is_connected():
+            conn.close()
 
 
 
