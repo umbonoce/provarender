@@ -16,29 +16,24 @@ def ExecuteQuery(inputPath,query):
         with conn.cursor() as cursor:
             results = cursor.execute(query)
             rows = cursor.fetchmany(size=10)
-            extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
         
     except Exception as error:
         conn = sqlite3.connect(inputPath)
     finally:
+        extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
         conn.close()
         return extractedData
 
 
 
 def GetChatList(inputPath):
-    if inputPath == "":
-        conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryChatList
-
         extractedData = ExecuteQuery(inputPath, query)
         return extractedData
 
 def GetGpsData(inputPath):
-    if inputPath == "":
-        conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryGpsData
 
         extractedData = ExecuteQuery(inputPath, query)
@@ -46,9 +41,7 @@ def GetGpsData(inputPath):
         return extractedData
 
 def GetBlockedContacts(inputPath):
-    if inputPath == "":
-        conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryBlockedContacts
 
         extractedData = ExecuteQuery(inputPath, query)
@@ -56,9 +49,7 @@ def GetBlockedContacts(inputPath):
         return extractedData
 
 def GetPrivateChat(inputPath, mediaType, phoneNumber):
-    if inputPath == "":
-       conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryPrivateChatCountersPT1 + phoneNumber + GlobalConstant.queryPrivateChatCountersPT2
 
         counters = ExecuteQuery(inputPath, query)
@@ -87,9 +78,7 @@ def GetPrivateChat(inputPath, mediaType, phoneNumber):
         return counters, extractedData
 
 def GetGroupChat(inputPath, mediaType, groupName):
-    if inputPath == "":
-        conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryGroupChatCountersPT1 + groupName + GlobalConstant.queryGroupChatCountersPT2
 
         counters = ExecuteQuery(inputPath, query)
@@ -122,9 +111,7 @@ def GetGroupChat(inputPath, mediaType, groupName):
         return counters, groupId, extractedData
 
 def GetGroupList(inputPath):
-    if inputPath == "":
-        conn = sqlite3.connect(inputPath)
-    else:
+    if inputPath != "":
         query = GlobalConstant.queryGroupList
         extractedData = ExecuteQuery(inputPath, query)
 
