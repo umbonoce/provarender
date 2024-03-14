@@ -97,7 +97,7 @@ def BlockedContact():
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
         extractedDataList  = ExtractInformation.GetBlockedContacts(inputPath)
-        return render_template('blockedContact.html', extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
+        return render_template('blockedContact.html', blockedContactsData=extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -373,9 +373,6 @@ def ExtractEncryptedBackup(deviceSn, udid):
 
 @app.route('/ExtractionOutPath')
 def ExtractionOutPath():
-
-    #session['outputPath'] = filedialog.askdirectory(title=GlobalConstant.selectOutputPath)
-
     if session['outputPath'] == "":
         session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
     else:
@@ -388,25 +385,39 @@ def ExtractionOutPath():
 @app.route('/generetePrivateChatReport/<phoneNumber>')
 def GeneretePrivateChatReport(phoneNumber):
 
-    counters, messages = ExtractInformation.GetPrivateChat(InputPath, '0', phoneNumber)
-    GenerateReport.PrivateChatReport(OutputPath, phoneNumber, messages)
+    counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
+    GenerateReport.PrivateChatReport(session['outputPath'], phoneNumber, messages)
+    
     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
-    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", OutputPath, phoneNumber)
-    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", OutputPath, phoneNumber)
+    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", session['outputPath'], phoneNumber)
+    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", session['outputPath'], phoneNumber)
 
     return redirect(url_for('PrivateChat', mediaType = 0, phoneNumber=phoneNumber))
 
 @app.route('/genereteGroupChatReport/<groupName>')
 def GenereteGroupChatReport(groupName):
-    counters, groupId, messages = ExtractInformation.GetGroupChat(InputPath, '0', groupName)
-    GenerateReport.GroupChatReport(OutputPath, groupName, messages)
-    basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
-    groupNameNoSpaces = groupName.replace(" ", "")
-    groupId = groupId[0]['ZCONTACTJID']
-    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + groupId, OutputPath, groupNameNoSpaces)
-    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + groupId, OutputPath, groupNameNoSpaces)
 
-    return redirect(url_for('GroupChat', mediaType = 0, groupName=groupName))
+    groupNameNoSpaces = groupName.replace(" ", "")
+
+    counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
+    report, certificate = GenerateReport.GroupChatReport(os.path.join(session['outputPath'], groupNameNoSpaces), groupName, messages)
+    
+    basePath = session['outputPath']
+    groupId = groupId[0]['ZCONTACTJID']
+    sha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, "data"), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
+    md5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, "data"), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
+
+    memory_file = BytesIO()
+
+    with ZipFile(memory_file, "w") as newzip:
+        newzip.write(report, os.path.basename(report))
+        newzip.write(certificate, os.path.basename(certificate))
+        newzip.write(sha, os.path.basename(sha))
+        newzip.write(md5, os.path.basename(md5))
+
+    memory_file.seek(0)
+    return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces + ".zip")
+
 
 @app.route('/about')
 def About():
@@ -448,7 +459,7 @@ def main():
     serve(app, host="0.0.0.0", port=8080)
     
     # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=True)     
+    # app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()

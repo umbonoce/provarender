@@ -13,7 +13,7 @@ from iOSbackup import iOSbackup
 from protobuf_decoder.protobuf_decoder import Parser
 from datetime import datetime, timezone
 
-basePath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
+basePath = os.path.dirname(os.path.abspath(__file__))
 
 def FormatPhoneNumber(phoneumber):
     if phoneumber.isdigit():
@@ -196,8 +196,8 @@ def ConvertSeconds(secondi):
     return "{:02d}:{:02d}".format(minuti, secondi_rimasti)
 
 def GetUserProfilePicImage(fileName):
-    directory = "/assets/Profile/"
-    for file in os.listdir(basePath + "/assets/Profile/"):
+    directory = os.path.join('assets', 'Profile')
+    for file in os.listdir(os.path.join(basePath, directory)):
         if file.startswith(fileName) and file.count('-') == 1:
-            return os.path.join(directory, file)
+            return os.path.join(os.path.join(basePath, directory), file)
     return "/assets/img/avatars/user.png"
