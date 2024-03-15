@@ -556,7 +556,7 @@ def GroupChatReport(outputPath, groupName, extractedData):
     words = groupName.split()
     groupNameNoSpaces = ''.join(words)
 
-    outFileName = outputPath + groupNameNoSpaces + "-Chat.pdf"
+    outFileName = os.path.join( outputPath , groupNameNoSpaces + "-Chat.pdf")
 
     # Define pages margins
     left_margin = 50
@@ -929,7 +929,7 @@ def CalculateMediaSHA256(directory_path, outputPath, fileName):
             print(relative_path)
             data.append([os.path.basename(file_path), Service.CalculateSHA256(file_path)])
 
-    outFileName = outputPath + fileName + "-Media-SHA256.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-Media-SHA256.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=landscape(A4))
@@ -989,7 +989,7 @@ def CalculateMediaMD5(directory_path, outputPath, fileName):
             print(relative_path)
             data.append([os.path.basename(file_path), Service.CalculateMD5(file_path)])
 
-    outFileName = outputPath + fileName + "-Media-MD5.pdf"
+    outFileName = os.path.join( outputPath , fileName + "-Media-MD5.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=landscape(A4))

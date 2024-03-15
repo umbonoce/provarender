@@ -160,3 +160,9 @@ cython_debug/
 #.idea/
 ChatStorage.sqlite
 *.vsidx
+/src/forensicWace/assets
+/src/forensicWace/.vs/forensicWace/FileContentIndex
+/src/forensicWace/.vs
+/src/forensicWace/data
+*.pdf
+*.tsr

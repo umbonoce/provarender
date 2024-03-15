@@ -1,3 +1,4 @@
+from tokenize import group
 import webbrowser
 #import forensicWace.ExtractInformation as ExtractInformation    # Comment this to develop on local. Add to create package to download and install pip
 import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
@@ -40,7 +41,7 @@ backupPath = GlobalConstant.backupDefaultPath
 phoneNumber = ""
 
 ALLOWED_EXTENSIONS = {'sqlite'}
-UPLOAD_FOLDER = 'C:\\Users\\u.nocerino\\Documents\\GitHub\\ForensicWace'
+UPLOAD_FOLDER = os.path.join(sys.path[0], 'assets')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -75,8 +76,8 @@ def InputPath():
             else:
                 InputPath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], InputPath))
-                OutputPath = InputPath.rsplit('/', 1)[0] + '/'
-                fileName = InputPath[InputPath.rfind('/') + 1:]
+                OutputPath = app.config['UPLOAD_FOLDER']
+                fileName = os.path.basename(InputPath)
                 fileSize = str(round(Service.GetFileSize(InputPath), 1)) + " MB"
                 dbSha256 = Service.CalculateSHA256(InputPath)
                 dbMd5 = Service.CalculateMD5(InputPath)
@@ -402,8 +403,8 @@ def GeneretePrivateChatReport(phoneNumber):
     counters, messages = ExtractInformation.GetPrivateChat(InputPath, '0', phoneNumber)
     GenerateReport.PrivateChatReport(OutputPath, phoneNumber, messages)
     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
-    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", OutputPath, phoneNumber)
-    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", OutputPath, phoneNumber)
+    GenerateReport.CalculateMediaSHA256( os.path.join( os.path.join(OutputPath, "Media"), phoneNumber + '@s.whatsapp.net') , OutputPath, phoneNumber)
+    GenerateReport.CalculateMediaMD5( os.path.join( os.path.join(OutputPath, "Media"), phoneNumber + '@s.whatsapp.net') , OutputPath, phoneNumber)
 
     return redirect(url_for('PrivateChat', mediaType = 0, phoneNumber=phoneNumber))
 
@@ -416,8 +417,9 @@ def GenereteGroupChatReport(groupName):
     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
     groupNameNoSpaces = groupName.replace(" ", "")
     groupId = groupId[0]['ZCONTACTJID']
-    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + groupId, OutputPath, groupNameNoSpaces)
-    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + groupId, OutputPath, groupNameNoSpaces)
+    print(groupId)
+    GenerateReport.CalculateMediaSHA256(os.path.join( os.path.join(OutputPath, "Media"), groupId), OutputPath, groupNameNoSpaces)
+    GenerateReport.CalculateMediaMD5(os.path.join( os.path.join(OutputPath, "Media"), groupId), OutputPath, groupNameNoSpaces)
 
     return redirect(url_for('GroupChat', mediaType = 0, groupName=groupName))
 
