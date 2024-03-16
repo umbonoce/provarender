@@ -99,10 +99,8 @@ def BlockedContact():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
-        print("LOG - - > "+ inputPath)
-        extractedDataList = ExtractInformation.GetBlockedContacts(inputPath)
-        print("LOG - - > "+ extractedDataList)
-        return render_template('blockedContact.html', blockedContactsData = extractedDataList , formatPhoneNumber=Service.FormatPhoneNumber)
+        session['extractedDataList'] = ExtractInformation.GetBlockedContacts(inputPath)
+        return render_template('blockedContact.html', blockedContactsData = session['extractedDataList'], formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 

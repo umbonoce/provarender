@@ -16,8 +16,11 @@ def ExecuteQuery(inputPath,query):
         cursor = conn.cursor()
         results = cursor.execute(query)
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
+        return extractedData
     except sqlite3.Error as error:
-        print("Failed to read data from sqlite table", error)
+        print("Failed to read data from sqlite table", error)    
+    except Exception as error:
+        print("General error", error)
     finally:
         if conn:
             conn.close()
@@ -25,7 +28,6 @@ def ExecuteQuery(inputPath,query):
             
     conn.close()
 
-    return extractedData
 
 def GetChatList(inputPath):
     if inputPath != "":
