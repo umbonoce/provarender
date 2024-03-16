@@ -43,6 +43,7 @@ def Home():
         session['reportStatus']  = 0
         session['noDbError']  = 1  
         session['noOutPathError']  = 1
+        session['extractedDataList'] = None
 
     return render_template('index.html', inputPath=session['inputPath'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
@@ -72,6 +73,7 @@ def InputPath():
                 session['dbMd5']  = Service.CalculateMD5(session['inputPath'])
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
+                session['extractedDataList'] = None
 
     return redirect(url_for('Home'))
 
