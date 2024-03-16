@@ -1,8 +1,7 @@
 import os
 import sqlite3
 from flask import flash
-#import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
-import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
+import GlobalConstant
 import subprocess
 import shutil
 
@@ -26,8 +25,6 @@ def ExecuteQuery(inputPath,query):
             conn.close()
             print("The SQLite connection is closed")
             
-    conn.close()
-
 
 def GetChatList(inputPath):
     if inputPath != "":

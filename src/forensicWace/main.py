@@ -17,8 +17,6 @@ import werkzeug
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-backupPath = GlobalConstant.backupDefaultPath
-
 phoneNumber = ""
 
 UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
@@ -161,12 +159,11 @@ def GroupListReport():
 
 @app.route('/chatList')
 def ChatList():
-    global extractedDataList
     
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
         extractedDataList = ExtractInformation.GetChatList(inputPath)
-        return render_template('chatList.html', chatListData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
+        return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -175,8 +172,9 @@ def GpsLocation():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
-        extractedDataList = ExtractInformation.GetGpsData(inputPath)
-        return render_template('gpsLocation.html', gpsData = extractedDataList )
+        while extractedDataList == None: 
+            extractedDataList = ExtractInformation.GetGpsData(inputPath)
+        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -489,11 +487,11 @@ def main():
     SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
     SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080)
     
-    # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=False)     
+    webbrowser.open('http://localhost:5000') 
+    app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()
