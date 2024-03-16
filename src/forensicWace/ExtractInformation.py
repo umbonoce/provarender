@@ -18,9 +18,13 @@ def ExecuteQuery(inputPath,query):
         results = cursor.execute(query)
         cursor.fetchall()
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
-    except Exception as error:
-        flash("ERRORE! L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
-
+    except sqlite3.Error as error:
+        print("Failed to read data from sqlite table", error)
+    finally:
+        if conn:
+            conn.close()
+            print("The SQLite connection is closed")
+            
     conn.close()
 
     return extractedData
