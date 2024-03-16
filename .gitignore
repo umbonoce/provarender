@@ -160,9 +160,8 @@ cython_debug/
 #.idea/
 *.sqlite
 *.vsidx
-/src/forensicWace/assets/Media
-/src/forensicWace/assets
+
+# Visual Studio
+src/forensicWace/.vs
 /src/forensicWace/assets
 /src/forensicWace/data
-/src/forensicWace/.vs
-/src/forensicWace/.vs

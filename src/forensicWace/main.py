@@ -98,8 +98,8 @@ def BlockedContact():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
-        extractedDataList  = ExtractInformation.GetBlockedContacts(inputPath)
-        return render_template('blockedContact.html', blockedContactsData=extractedDataList, formatPhoneNumber=Service.FormatPhoneNumber)
+        session['extractedDataList'] = ExtractInformation.GetBlockedContacts(inputPath)
+        return render_template('blockedContact.html', blockedContactsData=session['extractedDataList'] , formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -108,7 +108,7 @@ def BlockedContactReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -126,7 +126,7 @@ def GroupList():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('groupList.html', chatListData = session['extractedDataList'])
+        return render_template('groupList.html', chatListData =session['extractedDataList'])
     else:
         return redirect(url_for('Home'))
 
@@ -135,7 +135,7 @@ def SelectGroup():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('selectGroup.html', chatListData = session['extractedDataList'])
+        return render_template('selectGroup.html', chatListData =session['extractedDataList'])
     else:
         return redirect(url_for('Home'))
 
@@ -144,7 +144,7 @@ def GroupListReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -162,8 +162,8 @@ def ChatList():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
-        extractedDataList  = ExtractInformation.GetChatList(inputPath)
-        return render_template('chatList.html', chatListData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
+        session['extractedDataList'] = ExtractInformation.GetChatList(inputPath)
+        return render_template('chatList.html', chatListData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -171,8 +171,8 @@ def ChatList():
 def GpsLocation():
 
     if session['noDbError']  != 1:
-        extractedDataList  = ExtractInformation.GetGpsData(session['inputPath'])
-        return render_template('gpsLocation.html', gpsData = extractedDataList, formatPhoneNumber = Service.FormatPhoneNumber)
+        session['extractedDataList'] = ExtractInformation.GetGpsData(session['inputPath'])
+        return render_template('gpsLocation.html', gpsData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -181,7 +181,7 @@ def GpsLocationReport():
 
     if session['noDbError']  != 1:
         session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'], session['extractedDataList'])
+        outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -303,7 +303,7 @@ def CalculateDbHash():
 def ChatListReport():
 
     if session['noDbError']  != 1:
-        outputFile, certificateFile = GenerateReport.ChatListReport(session['outputPath'], session['fileName'], session['extractedDataList'])
+        outputFile, certificateFile = GenerateReport.ChatListReport(session['outputPath'], session['fileName'],session['extractedDataList'])
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
