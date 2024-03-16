@@ -13,11 +13,11 @@ from pathlib import Path
 def ExecuteQuery(inputPath,query):
 
     try:
-        conn = sqlite3.connect(inputPath)      
-        cursor = conn.cursor()
-        results = cursor.execute(query)
-        extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
-        return extractedData
+        with sqlite3.connect(inputPath) as connection:        
+            with connection.cursor() as cursor:
+                results = cursor.execute(query)
+                extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
+                return extractedData
     except Exception as error:
         flash("ERRORE! L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
 
@@ -113,53 +113,52 @@ def GetGroupList(inputPath):
 
         return extractedData
 
-def ExtractFullBackup(backupPath, udid, outputPath):
-    basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+# def ExtractFullBackup(backupPath, udid, outputPath):
+#     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 
-    homePath = str(Path.home()).replace('\\', '/')
+#     homePath = str(Path.home()).replace('\\', '/')
 
-    if os.path.exists(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/"):
-        shutil.rmtree(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/")
+#     if os.path.exists(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/"):
+#         shutil.rmtree(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/")
 
-    command = "python " + basePath + "/WhatsApp-Chat-Exporter-GitHub/__main__.py -i -b \"" + backupPath + "/Apple Computer/MobileSync/Backup/" + udid + "\" -o \"" + outputPath + "\" --move-media --no-html -j [JSON]"
-    subprocess.run(command, shell=True)
+#     command = "python " + basePath + "/WhatsApp-Chat-Exporter-GitHub/__main__.py -i -b \"" + backupPath + "/Apple Computer/MobileSync/Backup/" + udid + "\" -o \"" + outputPath + "\" --move-media --no-html -j [JSON]"
+#     subprocess.run(command, shell=True)
 
-    # Copy the Media Folder
-    sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media'
-    destinationPath = basePath + '/assets/Media'
-    if os.path.exists(destinationPath):
-        shutil.rmtree(destinationPath)
-    shutil.copytree(sourcePath, destinationPath)
+#     # Copy the Media Folder
+#     sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media'
+#     destinationPath = basePath + '/assets/Media'
+#     if os.path.exists(destinationPath):
+#         shutil.rmtree(destinationPath)
+#     shutil.copytree(sourcePath, destinationPath)
 
-    # Copy the Profile Picture Folder
-    sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Media/Profile'
-    destinationPath = basePath + '/assets/Profile'
-    if os.path.exists(destinationPath):
-        shutil.rmtree(destinationPath)
-    shutil.copytree(sourcePath, destinationPath)
+#     # Copy the Profile Picture Folder
+#     sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Media/Profile'
+#     destinationPath = basePath + '/assets/Profile'
+#     if os.path.exists(destinationPath):
+#         shutil.rmtree(destinationPath)
+#     shutil.copytree(sourcePath, destinationPath)
 
+# def ExtractEncryptedFullBackup(backupPath, udid, outputPath, password):
+#     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 
-def ExtractEncryptedFullBackup(backupPath, udid, outputPath, password):
-    basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+#     homePath = str(Path.home()).replace('\\', '/')
 
-    homePath = str(Path.home()).replace('\\', '/')
+#     if os.path.exists(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/"):
+#         shutil.rmtree(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/")
 
-    if os.path.exists(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/"):
-        shutil.rmtree(homePath + "/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/")
+#     command = "python " + basePath + "/WhatsApp-Chat-Exporter-GitHub/__main__.py -i -b \"" + backupPath + "/Apple Computer/MobileSync/Backup/" + udid + "\" -o \"" + outputPath + "\" --move-media --no-html -j [JSON] --password " + password
+#     subprocess.run(command, shell=True)
 
-    command = "python " + basePath + "/WhatsApp-Chat-Exporter-GitHub/__main__.py -i -b \"" + backupPath + "/Apple Computer/MobileSync/Backup/" + udid + "\" -o \"" + outputPath + "\" --move-media --no-html -j [JSON] --password " + password
-    subprocess.run(command, shell=True)
+#     # Copy the Media Folder
+#     sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media'
+#     destinationPath = basePath + '/assets/Media'
+#     if os.path.exists(destinationPath):
+#         shutil.rmtree(destinationPath)
+#     shutil.copytree(sourcePath, destinationPath)
 
-    # Copy the Media Folder
-    sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media'
-    destinationPath = basePath + '/assets/Media'
-    if os.path.exists(destinationPath):
-        shutil.rmtree(destinationPath)
-    shutil.copytree(sourcePath, destinationPath)
-
-    # Copy the Profile Picture Folder
-    sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Media/Profile'
-    destinationPath = basePath + '/assets/Profile'
-    if os.path.exists(destinationPath):
-        shutil.rmtree(destinationPath)
-    shutil.copytree(sourcePath, destinationPath)
+#     # Copy the Profile Picture Folder
+#     sourcePath = outputPath + '/AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Media/Profile'
+#     destinationPath = basePath + '/assets/Profile'
+#     if os.path.exists(destinationPath):
+#         shutil.rmtree(destinationPath)
+#     shutil.copytree(sourcePath, destinationPath)

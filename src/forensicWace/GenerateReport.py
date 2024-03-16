@@ -871,7 +871,7 @@ def DbHash(inputPath, outputPath, fileName):
 
     data = [["Database file name", "Hash code - SHA256"], [fileName, Service.CalculateSHA256(inputPath)]]
 
-    outFileName = outputPath + fileName + "-DatabaseHash.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-DatabaseHash.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=landscape(A4))
@@ -913,7 +913,7 @@ def DbHash(inputPath, outputPath, fileName):
     # Scrittura del documento
     doc.build(fileElements, onFirstPage=CreateHorizontalDocHeaderAndFooter)
 
-    Service.CertificateReport(outFileName)
+    certificateFile = Service.CertificateReport(outFileName)
 
     # Verifica l'esistenza del file PDF appena creato.
     # SE esiste lo apre automaticamente
@@ -928,6 +928,7 @@ def DbHash(inputPath, outputPath, fileName):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
+        return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")
 
