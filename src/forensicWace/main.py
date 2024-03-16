@@ -37,7 +37,7 @@ def Home():
     
     if 'fileName' not in session:
         session['inputPath'] = GlobalConstant.noDatabaseSelected
-        UPLOAD_FOLDER = GlobalConstant.noDatabaseSelected
+        app.config['UPLOAD_FOLDER'] = GlobalConstant.noDatabaseSelected
         session['fileName'] = GlobalConstant.noDatabaseSelected
         session['fileSize'] = GlobalConstant.noDatabaseSelected
         session['dbSha256'] = GlobalConstant.noDatabaseSelected
@@ -49,7 +49,7 @@ def Home():
         session['noOutPathError']  = 1
         extractedDataList  = None
 
-    return render_template('index.html', inputPath=session['inputPath'], outputPath=UPLOAD_FOLDER, fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
+    return render_template('index.html', inputPath=session['inputPath'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
 @app.route('/inputPath', methods = ['GET', 'POST'])
 def InputPath():
@@ -83,10 +83,10 @@ def InputPath():
 # @app.route('/outputPath', methods = ['GET', 'POST'])
 # def OutputPath():
 
-#     if UPLOAD_FOLDER == "":
-#         UPLOAD_FOLDER = session['inputPath'].rsplit('/', 1)[0] + '/'
+#     if app.config['UPLOAD_FOLDER'] == "":
+#         app.config['UPLOAD_FOLDER'] = session['inputPath'].rsplit('/', 1)[0] + '/'
 #     else:
-#         UPLOAD_FOLDER = UPLOAD_FOLDER + '/'
+#         app.config['UPLOAD_FOLDER'] = app.config['UPLOAD_FOLDER'] + '/'
 
 #     session['noOutPathError']  = 0
 
@@ -107,7 +107,7 @@ def BlockedContactReport():
 
     if session['noDbError']  != 1:
         extractedDataList  = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'],extractedDataList)
+        outputFile, certificateFile = GenerateReport.BlockedContactReport(app.config['UPLOAD_FOLDER'], session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -145,7 +145,7 @@ def GroupListReport():
 
     if session['noDbError']  != 1:
         extractedDataList  = ExtractInformation.GetGroupList(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'],extractedDataList)
+        outputFile, certificateFile = GenerateReport.GroupListReport(app.config['UPLOAD_FOLDER'], session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -184,7 +184,7 @@ def GpsLocationReport():
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
         extractedDataList  = ExtractInformation.GetGpsData(inputPath)
-        outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'],extractedDataList)
+        outputFile, certificateFile = GenerateReport.GpsLocations(app.config['UPLOAD_FOLDER'], session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -299,7 +299,7 @@ def CalculateDbHash():
 
     if session['noDbError']  != 1:
         global InputPath
-        GenerateReport.DbHash(session['inputPath'], UPLOAD_FOLDER, session['fileName'])
+        GenerateReport.DbHash(session['inputPath'], app.config['UPLOAD_FOLDER'], session['fileName'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -309,7 +309,7 @@ def ChatListReport():
 
     if session['noDbError']  != 1:
         extractedDataList = ExtractInformation.GetChatList(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.ChatListReport(UPLOAD_FOLDER, session['fileName'], extractedDataList)
+        outputFile, certificateFile = GenerateReport.ChatListReport(app.config['UPLOAD_FOLDER'], session['fileName'], extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -392,10 +392,10 @@ def ExtractEncryptedBackup(deviceSn, udid):
 
 # @app.route('/ExtractionOutPath')
 # def ExtractionOutPath():
-#     if UPLOAD_FOLDER == "":
-#         UPLOAD_FOLDER = InputPath.rsplit('/', 1)[0] + '/'
+#     if app.config['UPLOAD_FOLDER'] == "":
+#         app.config['UPLOAD_FOLDER'] = InputPath.rsplit('/', 1)[0] + '/'
 #     else:
-#         UPLOAD_FOLDER = UPLOAD_FOLDER + '/'
+#         app.config['UPLOAD_FOLDER'] = app.config['UPLOAD_FOLDER'] + '/'
 
 #     session['noOutPathError']  = 0
 
@@ -405,9 +405,9 @@ def ExtractEncryptedBackup(deviceSn, udid):
 def GeneretePrivateChatReport(phoneNumber):
 
     counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
-    GenerateReport.PrivateChatReport(UPLOAD_FOLDER, phoneNumber, messages)
+    GenerateReport.PrivateChatReport(app.config['UPLOAD_FOLDER'], phoneNumber, messages)
     
-    basePath = UPLOAD_FOLDER
+    basePath = app.config['UPLOAD_FOLDER']
     GenerateReport.CalculateMediaSHA256(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
     GenerateReport.CalculateMediaMD5(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
 
@@ -419,9 +419,9 @@ def GenereteGroupChatReport(groupName):
     groupNameNoSpaces = groupName.replace(" ", "")
 
     counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
-    report, certificate = GenerateReport.GroupChatReport(os.path.join(UPLOAD_FOLDER, groupNameNoSpaces), groupName, messages)
+    report, certificate = GenerateReport.GroupChatReport(os.path.join(app.config['UPLOAD_FOLDER'], groupNameNoSpaces), groupName, messages)
     
-    basePath = UPLOAD_FOLDER
+    basePath = app.config['UPLOAD_FOLDER']
     groupId = groupId[0]['ZCONTACTJID']
     sha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
     md5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
@@ -458,7 +458,6 @@ def SetGlobalCheckReportVar(valueRep, valueCert):
 def Exit():
     
     session['inputPath'] = GlobalConstant.noDatabaseSelected
-    UPLOAD_FOLDER = GlobalConstant.noDatabaseSelected
     session['fileName'] = GlobalConstant.noDatabaseSelected
     session['fileSize'] = GlobalConstant.noDatabaseSelected
     session['dbSha256'] = GlobalConstant.noDatabaseSelected
