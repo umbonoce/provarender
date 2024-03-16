@@ -45,7 +45,6 @@ def Home():
         session['reportStatus']  = 0
         session['noDbError']  = 1  
         session['noOutPathError']  = 1
-        extractedDataList  = None
 
     return render_template('index.html', inputPath=session['inputPath'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
@@ -162,7 +161,8 @@ def GroupListReport():
 
 @app.route('/chatList')
 def ChatList():
-
+    global extractedDataList
+    
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
         extractedDataList = ExtractInformation.GetChatList(inputPath)
@@ -176,9 +176,21 @@ def GpsLocation():
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
         extractedDataList = ExtractInformation.GetGpsData(inputPath)
-        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
+        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
+
+def FormatPhoneNumber(phoneumber):
+    if phoneumber.isdigit():
+        # Rimuovi tutti i caratteri non numerici dal numero di telefono
+        numberOnlyDigit = re.sub(r'\D', '', phoneumber)
+
+        # Utilizza la funzione re.sub per aggiungere spazi nel formato desiderato
+        formattedNumber = re.sub(r'(\d{2})(\d{3})(\d{3})(\d{4})', r'+\1 \2 \3 \4', numberOnlyDigit)
+
+        return formattedNumber
+    else:
+        return phoneumber
 
 @app.route('/gpsLocationReport')
 def GpsLocationReport():
