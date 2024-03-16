@@ -1,7 +1,7 @@
+from bleach import sanitizer
 import jinja2
 import json
 import os
-from bleach import clean as sanitize
 from markupsafe import Markup
 from datetime import datetime
 from enum import IntEnum
@@ -20,7 +20,7 @@ ROW_SIZE = 0x3D0
 
 
 def sanitize_except(html):
-    return Markup(sanitize(html, tags=["br"]))
+    return Markup(sanitizer(html, tags=["br"]))
 
 
 def determine_day(last, current):

@@ -37,7 +37,7 @@ def Home():
     
     if 'fileName' not in session:
         session['inputPath'] = GlobalConstant.noDatabaseSelected
-        session['outputPath'] = GlobalConstant.noDatabaseSelected
+        UPLOAD_FOLDER = GlobalConstant.noDatabaseSelected
         session['fileName'] = GlobalConstant.noDatabaseSelected
         session['fileSize'] = GlobalConstant.noDatabaseSelected
         session['dbSha256'] = GlobalConstant.noDatabaseSelected
@@ -47,9 +47,9 @@ def Home():
         session['reportStatus']  = 0
         session['noDbError']  = 1  
         session['noOutPathError']  = 1
-        session['extractedDataList']  = None
+        extractedDataList  = None
 
-    return render_template('index.html', inputPath=session['inputPath'], outputPath=session['outputPath'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
+    return render_template('index.html', inputPath=session['inputPath'], outputPath=UPLOAD_FOLDER, fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
 @app.route('/inputPath', methods = ['GET', 'POST'])
 def InputPath():
@@ -71,7 +71,6 @@ def InputPath():
             else:
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 f.save(session['inputPath'])
-                session['outputPath'] = UPLOAD_FOLDER
                 session['fileName'] = os.path.basename(session['inputPath'])
                 session['fileSize'] = str(round(Service.GetFileSize(session['inputPath']), 1)) + " MB"
                 session['dbSha256'] = Service.CalculateSHA256(session['inputPath'])
@@ -81,25 +80,25 @@ def InputPath():
 
     return redirect(url_for('Home'))
 
-@app.route('/outputPath', methods = ['GET', 'POST'])
-def OutputPath():
+# @app.route('/outputPath', methods = ['GET', 'POST'])
+# def OutputPath():
 
-    if session['outputPath'] == "":
-        session['outputPath'] = session['inputPath'] .rsplit('/', 1)[0] + '/'
-    else:
-        session['outputPath'] = session['outputPath'] + '/'
+#     if UPLOAD_FOLDER == "":
+#         UPLOAD_FOLDER = session['inputPath'].rsplit('/', 1)[0] + '/'
+#     else:
+#         UPLOAD_FOLDER = UPLOAD_FOLDER + '/'
 
-    session['noOutPathError']  = 0
+#     session['noOutPathError']  = 0
 
-    return redirect(url_for('Home'))
+#     return redirect(url_for('Home'))
 
 @app.route('/blockedContact')
 def BlockedContact():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
-        session['extractedDataList'] = ExtractInformation.GetBlockedContacts(inputPath)
-        return render_template('blockedContact.html', blockedContactsData=session['extractedDataList'] , formatPhoneNumber=Service.FormatPhoneNumber)
+        extractedDataList = ExtractInformation.GetBlockedContacts(inputPath)
+        return render_template('blockedContact.html', blockedContactsData=extractedDataList , formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -107,8 +106,8 @@ def BlockedContact():
 def BlockedContactReport():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetBlockedContacts(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
+        extractedDataList  = ExtractInformation.GetBlockedContacts(session['inputPath'])
+        outputFile, certificateFile = GenerateReport.BlockedContactReport(UPLOAD_FOLDER, session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -125,8 +124,9 @@ def BlockedContactReport():
 def GroupList():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('groupList.html', chatListData =session['extractedDataList'])
+        inputPath = session['inputPath']
+        extractedDataList = ExtractInformation.GetGroupList(inputPath)
+        return render_template('groupList.html', chatListData = extractedDataList)
     else:
         return redirect(url_for('Home'))
 
@@ -134,8 +134,9 @@ def GroupList():
 def SelectGroup():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        return render_template('selectGroup.html', chatListData =session['extractedDataList'])
+        inputPath = session['inputPath']
+        extractedDataList  = ExtractInformation.GetGroupList(inputPath)
+        return render_template('selectGroup.html', chatListData = extractedDataList)
     else:
         return redirect(url_for('Home'))
 
@@ -143,8 +144,8 @@ def SelectGroup():
 def GroupListReport():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetGroupList(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
+        extractedDataList  = ExtractInformation.GetGroupList(session['inputPath'])
+        outputFile, certificateFile = GenerateReport.GroupListReport(UPLOAD_FOLDER, session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -161,9 +162,9 @@ def GroupListReport():
 def ChatList():
 
     if session['noDbError']  != 1:
-        inputPath = session['inputPath']
-        session['extractedDataList'] = ExtractInformation.GetChatList(inputPath)
-        return render_template('chatList.html', chatListData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
+        inputPath = session['inputPath']        
+        extractedDataList = ExtractInformation.GetChatList(inputPath)
+        return render_template('chatList.html', chatListData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -171,8 +172,9 @@ def ChatList():
 def GpsLocation():
 
     if session['noDbError']  != 1:
-        session['extractedDataList'] = ExtractInformation.GetGpsData(session['inputPath'])
-        return render_template('gpsLocation.html', gpsData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
+        inputPath = session['inputPath']        
+        extractedDataList = ExtractInformation.GetGpsData(inputPath)
+        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
@@ -180,8 +182,9 @@ def GpsLocation():
 def GpsLocationReport():
 
     if session['noDbError']  != 1:
-        session['extractedDataList']  = ExtractInformation.GetGpsData(session['inputPath'])
-        outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'],session['extractedDataList'])
+        inputPath = session['inputPath']        
+        extractedDataList  = ExtractInformation.GetGpsData(inputPath)
+        outputFile, certificateFile = GenerateReport.GpsLocations(UPLOAD_FOLDER, session['fileName'],extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -213,7 +216,8 @@ def InsertPhoneNumber():
 def PrivateChat(mediaType, phoneNumber):
 
     if session['noDbError']  != 1:
-        counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], mediaType, phoneNumber)
+        inputPath = session['inputPath']               
+        counters, messages = ExtractInformation.GetPrivateChat(inputPath, mediaType, phoneNumber)
         return render_template('privateChat.html', phoneNumber=Service.FormatPhoneNumber(phoneNumber), nonFormattedNumber = phoneNumber, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, originalPhoneNumber = phoneNumber, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, GetUserProfilePicImage = Service.GetUserProfilePicImage)
     else:
         return redirect(url_for('Home'))
@@ -232,10 +236,11 @@ def GroupChat(mediaType, groupName):
             file.save(os.path.join(basePath,secure_filename(file.filename)))
 
     if session['noDbError']  != 1:
-        counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], mediaType, groupName)
+        inputPath = session['inputPath']               
+        counters, groupId, messages = ExtractInformation.GetGroupChat(inputPath, mediaType, groupName)
         groupId = groupId[0]['ZCONTACTJID']
 
-        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage, groupId = groupId)
+        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, groupId = groupId, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage)
     else:
         return redirect(url_for('Home'))
 
@@ -294,7 +299,7 @@ def CalculateDbHash():
 
     if session['noDbError']  != 1:
         global InputPath
-        GenerateReport.DbHash(session['inputPath'], session['outputPath'], session['fileName'])
+        GenerateReport.DbHash(session['inputPath'], UPLOAD_FOLDER, session['fileName'])
         return redirect(url_for('Home'))
     else:
         return redirect(url_for('Home'))
@@ -303,7 +308,8 @@ def CalculateDbHash():
 def ChatListReport():
 
     if session['noDbError']  != 1:
-        outputFile, certificateFile = GenerateReport.ChatListReport(session['outputPath'], session['fileName'],session['extractedDataList'])
+        extractedDataList = ExtractInformation.GetChatList(session['inputPath'])
+        outputFile, certificateFile = GenerateReport.ChatListReport(UPLOAD_FOLDER, session['fileName'], extractedDataList)
         memory_file = BytesIO()
 
         with ZipFile(memory_file, "w") as newzip:
@@ -384,24 +390,24 @@ def ExtractEncryptedBackup(deviceSn, udid):
 
     return render_template('availableBackup.html', backupList=backupList, backupPath=backupPath, extractionStatus=1, deviceSn=deviceSn, udid=udid, outputPath=OutputPath, noOutPathError=noOutPathError)
 
-@app.route('/ExtractionOutPath')
-def ExtractionOutPath():
-    if session['outputPath'] == "":
-        session['outputPath'] = InputPath.rsplit('/', 1)[0] + '/'
-    else:
-        session['outputPath'] = session['outputPath'] + '/'
+# @app.route('/ExtractionOutPath')
+# def ExtractionOutPath():
+#     if UPLOAD_FOLDER == "":
+#         UPLOAD_FOLDER = InputPath.rsplit('/', 1)[0] + '/'
+#     else:
+#         UPLOAD_FOLDER = UPLOAD_FOLDER + '/'
 
-    session['noOutPathError']  = 0
+#     session['noOutPathError']  = 0
 
-    return redirect(url_for('AvailableBackups'))
+#     return redirect(url_for('AvailableBackups'))
 
 @app.route('/generetePrivateChatReport/<phoneNumber>')
 def GeneretePrivateChatReport(phoneNumber):
 
     counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
-    GenerateReport.PrivateChatReport(session['outputPath'], phoneNumber, messages)
+    GenerateReport.PrivateChatReport(UPLOAD_FOLDER, phoneNumber, messages)
     
-    basePath = session['outputPath']
+    basePath = UPLOAD_FOLDER
     GenerateReport.CalculateMediaSHA256(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
     GenerateReport.CalculateMediaMD5(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
 
@@ -413,9 +419,9 @@ def GenereteGroupChatReport(groupName):
     groupNameNoSpaces = groupName.replace(" ", "")
 
     counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
-    report, certificate = GenerateReport.GroupChatReport(os.path.join(session['outputPath'], groupNameNoSpaces), groupName, messages)
+    report, certificate = GenerateReport.GroupChatReport(os.path.join(UPLOAD_FOLDER, groupNameNoSpaces), groupName, messages)
     
-    basePath = session['outputPath']
+    basePath = UPLOAD_FOLDER
     groupId = groupId[0]['ZCONTACTJID']
     sha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
     md5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
@@ -452,7 +458,7 @@ def SetGlobalCheckReportVar(valueRep, valueCert):
 def Exit():
     
     session['inputPath'] = GlobalConstant.noDatabaseSelected
-    session['outputPath'] = GlobalConstant.noDatabaseSelected
+    UPLOAD_FOLDER = GlobalConstant.noDatabaseSelected
     session['fileName'] = GlobalConstant.noDatabaseSelected
     session['fileSize'] = GlobalConstant.noDatabaseSelected
     session['dbSha256'] = GlobalConstant.noDatabaseSelected
