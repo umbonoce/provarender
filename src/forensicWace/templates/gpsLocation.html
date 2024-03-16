@@ -43,8 +43,10 @@
                                 <tbody>
                                 {% for item in gpsData %}
                                     <tr>
-                                        <td>{{ formatPhoneNumber(item.Sender) }}</td>
-                                        <td>{{ formatPhoneNumber(item.Receiver) }}</td>
+                                        <!--<td>{{ FormatPhoneNumber(item.Sender) }}</td>-->
+                                        <td>{{ item.Sender }}</td>
+                                        <!--<td>{{ FormatPhoneNumber(item.Receiver) }}</td>-->
+                                        <td>{{ item.Receiver }}</td>
                                         <td>{{ item.MessageDate }}</td>
                                         <td>{{ item.Latitude }}</td>
                                         <td>{{ item.Longitude }}</td>

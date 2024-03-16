@@ -15,17 +15,17 @@ from datetime import datetime, timezone
 
 basePath = os.path.dirname(os.path.abspath(__file__))
 
-def FormatPhoneNumber(phoneumber):
-    if phoneumber.isdigit():
+def FormatPhoneNumber(phoneNumber):
+    if phoneNumber.isdigit():
         # Rimuovi tutti i caratteri non numerici dal numero di telefono
-        numberOnlyDigit = re.sub(r'\D', '', phoneumber)
+        numberOnlyDigit = re.sub(r'\D', '', phoneNumber)
 
         # Utilizza la funzione re.sub per aggiungere spazi nel formato desiderato
         formattedNumber = re.sub(r'(\d{2})(\d{3})(\d{3})(\d{4})', r'+\1 \2 \3 \4', numberOnlyDigit)
 
         return formattedNumber
     else:
-        return phoneumber
+        return phoneNumber
 
 def GetFileSize(filePath):
     try:

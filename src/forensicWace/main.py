@@ -176,21 +176,9 @@ def GpsLocation():
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
         extractedDataList = ExtractInformation.GetGpsData(inputPath)
-        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = FormatPhoneNumber)
+        return render_template('gpsLocation.html', gpsData = extractedDataList )
     else:
         return redirect(url_for('Home'))
-
-def FormatPhoneNumber(phoneumber):
-    if phoneumber.isdigit():
-        # Rimuovi tutti i caratteri non numerici dal numero di telefono
-        numberOnlyDigit = re.sub(r'\D', '', phoneumber)
-
-        # Utilizza la funzione re.sub per aggiungere spazi nel formato desiderato
-        formattedNumber = re.sub(r'(\d{2})(\d{3})(\d{3})(\d{4})', r'+\1 \2 \3 \4', numberOnlyDigit)
-
-        return formattedNumber
-    else:
-        return phoneumber
 
 @app.route('/gpsLocationReport')
 def GpsLocationReport():
