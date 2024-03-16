@@ -1,6 +1,5 @@
 import os
 import sqlite3
-
 from flask import flash
 #import forensicWace.GlobalConstant as GlobalConstant    # Comment this to develop on local. Add to create package to download and install pip
 import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
@@ -13,11 +12,11 @@ from pathlib import Path
 def ExecuteQuery(inputPath,query):
 
     try:
-        with sqlite3.connect(inputPath) as connection:        
-            with connection.cursor() as cursor:
-                results = cursor.execute(query)
-                extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
-                return extractedData
+        conn = sqlite3.connect(inputPath)      
+        cursor = conn.cursor()
+        results = cursor.execute(query)
+        extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
+        return extractedData
     except Exception as error:
         flash("ERRORE! L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
 
@@ -31,17 +30,13 @@ def GetChatList(inputPath):
 def GetGpsData(inputPath):
     if inputPath != "":
         query = GlobalConstant.queryGpsData
-
         extractedData = ExecuteQuery(inputPath, query)
-
         return extractedData
 
 def GetBlockedContacts(inputPath):
     if inputPath != "":
         query = GlobalConstant.queryBlockedContacts
-
         extractedData = ExecuteQuery(inputPath, query)
-
         return extractedData
 
 def GetPrivateChat(inputPath, mediaType, phoneNumber):
@@ -110,7 +105,6 @@ def GetGroupList(inputPath):
     if inputPath != "":
         query = GlobalConstant.queryGroupList
         extractedData = ExecuteQuery(inputPath, query)
-
         return extractedData
 
 # def ExtractFullBackup(backupPath, udid, outputPath):
