@@ -102,7 +102,7 @@ def BlockedContact():
         print("LOG - - > "+ inputPath)
         extractedDataList = ExtractInformation.GetBlockedContacts(inputPath)
         print("LOG - - > "+ extractedDataList)
-        return render_template('blockedContact.html', blockedContactsData=extractedDataList , formatPhoneNumber=Service.FormatPhoneNumber)
+        return render_template('blockedContact.html', blockedContactsData = extractedDataList , formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 

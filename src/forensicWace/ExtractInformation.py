@@ -10,16 +10,20 @@ import shutil
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
+    # Connessione al database
+    conn = sqlite3.connect(inputPath)
 
     try:
-        conn = sqlite3.connect(inputPath)      
         cursor = conn.cursor()
         results = cursor.execute(query)
+
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
-        return extractedData
     except Exception as error:
         flash("ERRORE! L'estrazione richiesta non ha prodotto in output alcun risultato in quanto all'interno del database non risultano presenti i dati richiesti\n\nErrore durante l'esecuzione della query: " + str(error))
 
+    conn.close()
+
+    return extractedData
 
 def GetChatList(inputPath):
     if inputPath != "":
