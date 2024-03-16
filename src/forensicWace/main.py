@@ -12,7 +12,7 @@ import GlobalConstant    # Uncomment this to develop on local. Add to create pac
 from flask import Flask, flash, render_template, send_file, send_from_directory, session, redirect, url_for, request
 from datetime import timedelta
 from zipfile import ZipFile
-import werkzeug
+from werkzeug import utils
 
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -61,7 +61,7 @@ def InputPath():
             flash('No selected file')
             return redirect(request.url)
         if f and allowed_file(f.filename, {'sqlite'}):
-            filename = werkzeug.utils.secure_filename(f.filename)
+            filename = utils.secure_filename(f.filename)
             if filename == "":
                 session['inputPath'] = GlobalConstant.noDatabaseSelected
             else:
@@ -173,8 +173,7 @@ def GpsLocation():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
-        while session['extractedDataList']  == None: 
-            session['extractedDataList'] = ExtractInformation.GetGpsData(inputPath)
+        session['extractedDataList'] = ExtractInformation.GetGpsData(inputPath)
         return render_template('gpsLocation.html', gpsData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -235,7 +234,7 @@ def GroupChat(mediaType, groupName):
             basePath = os.path.join(app.config['UPLOAD_FOLDER'], path)
             if not os.path.exists(basePath):
                 os.makedirs(basePath, exist_ok=True)          
-            file.save(os.path.join(basePath,werkzeug.secure_filename(file.filename)))
+            file.save(os.path.join(basePath, utils.secure_filename(file.filename) ))
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']               
@@ -266,7 +265,7 @@ def ReportPath():
         f = request.files['file']
         
         if f and allowed_file(f.filename, {'pdf'}):
-            filename = werkzeug.utils.secure_filename(f.filename)
+            filename = utils.secure_filename(f.filename)
             if filename == "":
                 session['reportPath'] = GlobalConstant.noDatabaseSelected
             else:
@@ -287,7 +286,7 @@ def CertificatePath():
         f = request.files['file']
         
         if f and allowed_file(f.filename, {'tsr'}):
-            filename = werkzeug.utils.secure_filename(f.filename)
+            filename = utils.secure_filename(f.filename)
             if filename == "":
                 session['certificatePath'] = GlobalConstant.noDatabaseSelected
             else:
