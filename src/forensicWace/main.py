@@ -1,5 +1,7 @@
 from io import BytesIO
 import webbrowser
+
+from werkzeug.utils import secure_filename
 import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
 import os
 import sys
@@ -20,7 +22,7 @@ backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 
-UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
+UPLOAD_FOLDER = os.path.join(sys.path[0], 'assets')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename, formato):
@@ -70,7 +72,7 @@ def InputPath():
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 f.save(session['inputPath'])
                 session['outputPath'] = UPLOAD_FOLDER
-                session['fileName'] = session['inputPath'].split('\\')[-1]
+                session['fileName'] = os.path.basename(session['inputPath'])
                 session['fileSize'] = str(round(Service.GetFileSize(session['inputPath']), 1)) + " MB"
                 session['dbSha256'] = Service.CalculateSHA256(session['inputPath'])
                 session['dbMd5']  = Service.CalculateMD5(session['inputPath'])
@@ -207,7 +209,7 @@ def InsertPhoneNumber():
     else:
         return redirect(url_for('Home'))
 
-@app.route('/privateChat/<mediaType>/<phoneNumber>')
+@app.route('/privateChat/<mediaType>/<phoneNumber>' , methods = ['GET', 'POST'])
 def PrivateChat(mediaType, phoneNumber):
 
     if session['noDbError']  != 1:
@@ -216,13 +218,24 @@ def PrivateChat(mediaType, phoneNumber):
     else:
         return redirect(url_for('Home'))
 
-@app.route('/groupChat/<mediaType>/<groupName>')
+@app.route('/groupChat/<mediaType>/<groupName>', methods = ['GET', 'POST'])
 def GroupChat(mediaType, groupName):
+
+    if request.method =='POST':
+        files = request.files.getlist("file")
+        
+        for file in files:
+            path = os.path.dirname(file.filename)
+            basePath = os.path.join(app.config['UPLOAD_FOLDER'], path)
+            if not os.path.exists(basePath):
+                os.makedirs(basePath, exist_ok=True)          
+            file.save(os.path.join(basePath,secure_filename(file.filename)))
 
     if session['noDbError']  != 1:
         counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], mediaType, groupName)
+        groupId = groupId[0]['ZCONTACTJID']
 
-        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage)
+        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage, groupId = groupId)
     else:
         return redirect(url_for('Home'))
 
@@ -388,9 +401,9 @@ def GeneretePrivateChatReport(phoneNumber):
     counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
     GenerateReport.PrivateChatReport(session['outputPath'], phoneNumber, messages)
     
-    basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
-    GenerateReport.CalculateMediaSHA256(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", session['outputPath'], phoneNumber)
-    GenerateReport.CalculateMediaMD5(basePath + "/assets/Media/" + phoneNumber + "@s.whatsapp.net", session['outputPath'], phoneNumber)
+    basePath = session['outputPath']
+    GenerateReport.CalculateMediaSHA256(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
+    GenerateReport.CalculateMediaMD5(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), os.path.join(basePath, phoneNumber), phoneNumber)
 
     return redirect(url_for('PrivateChat', mediaType = 0, phoneNumber=phoneNumber))
 
@@ -404,8 +417,8 @@ def GenereteGroupChatReport(groupName):
     
     basePath = session['outputPath']
     groupId = groupId[0]['ZCONTACTJID']
-    sha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, "data"), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
-    md5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, "data"), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
+    sha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
+    md5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, groupId), os.path.join(basePath, groupNameNoSpaces), groupNameNoSpaces)
 
     memory_file = BytesIO()
 
@@ -414,6 +427,8 @@ def GenereteGroupChatReport(groupName):
         newzip.write(certificate, os.path.basename(certificate))
         newzip.write(sha, os.path.basename(sha))
         newzip.write(md5, os.path.basename(md5))
+        if os.path.exists(os.path.join(basePath, groupId)):
+            newzip.write(os.path.join(basePath, groupId) , "Media") 
 
     memory_file.seek(0)
     return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces + ".zip")
@@ -459,7 +474,7 @@ def main():
     serve(app, host="0.0.0.0", port=8080)
     
     # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=False)     
+    # app.run(debug=True, use_reloader=True)     
 
 if __name__ == '__main__':
     main()

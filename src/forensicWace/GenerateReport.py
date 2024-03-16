@@ -988,6 +988,7 @@ def CalculateMediaSHA256(directory_path, outputPath, fileName):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
+        return outFileName
     else:
         print("Errore: il file PDF non è stato creato.")
 
@@ -1048,5 +1049,6 @@ def CalculateMediaMD5(directory_path, outputPath, fileName):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
+        return outFileName
     else:
         print("Errore: il file PDF non è stato creato.")

@@ -160,3 +160,9 @@ cython_debug/
 #.idea/
 *.sqlite
 *.vsidx
+/src/forensicWace/assets/Media
+/src/forensicWace/assets
+/src/forensicWace/assets
+/src/forensicWace/data
+/src/forensicWace/.vs
+/src/forensicWace/.vs
