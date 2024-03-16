@@ -172,9 +172,9 @@ def GpsLocation():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']        
-        while extractedDataList == None: 
-            extractedDataList = ExtractInformation.GetGpsData(inputPath)
-        return render_template('gpsLocation.html', gpsData = extractedDataList , formatPhoneNumber = Service.FormatPhoneNumber)
+        while session['extractedDataList']  == None: 
+            session['extractedDataList'] = ExtractInformation.GetGpsData(inputPath)
+        return render_template('gpsLocation.html', gpsData = session['extractedDataList'] , formatPhoneNumber = Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
 
