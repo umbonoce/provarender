@@ -73,7 +73,6 @@ def InputPath():
                 session['dbMd5']  = Service.CalculateMD5(session['inputPath'])
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
-                session['extractedDataList'] = None
 
     return redirect(url_for('Home'))
 
