@@ -1,7 +1,6 @@
 from io import BytesIO
 import webbrowser
 
-from werkzeug.utils import secure_filename
 import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
 import os
 import sys
@@ -100,7 +99,9 @@ def BlockedContact():
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']
+        print("LOG - - > "+ inputPath)
         extractedDataList = ExtractInformation.GetBlockedContacts(inputPath)
+        print("LOG - - > "+ extractedDataList)
         return render_template('blockedContact.html', blockedContactsData=extractedDataList , formatPhoneNumber=Service.FormatPhoneNumber)
     else:
         return redirect(url_for('Home'))
@@ -237,7 +238,7 @@ def GroupChat(mediaType, groupName):
             basePath = os.path.join(app.config['UPLOAD_FOLDER'], path)
             if not os.path.exists(basePath):
                 os.makedirs(basePath, exist_ok=True)          
-            file.save(os.path.join(basePath,secure_filename(file.filename)))
+            file.save(os.path.join(basePath,werkzeug.secure_filename(file.filename)))
 
     if session['noDbError']  != 1:
         inputPath = session['inputPath']               
