@@ -10,13 +10,11 @@ import shutil
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
-    # Connessione al database
-    conn = sqlite3.connect(inputPath)
-
     try:
+        # Connessione al database
+        conn = sqlite3.connect(inputPath)        
         cursor = conn.cursor()
         results = cursor.execute(query)
-        cursor.fetchall()
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
     except sqlite3.Error as error:
         print("Failed to read data from sqlite table", error)
