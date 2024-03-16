@@ -196,8 +196,8 @@ def ConvertSeconds(secondi):
     return "{:02d}:{:02d}".format(minuti, secondi_rimasti)
 
 def GetUserProfilePicImage(fileName):
-    directory = os.path.join('assets', 'Profile')
-    for file in os.listdir(os.path.join(basePath, directory)):
-        if file.startswith(fileName) and file.count('-') == 1:
-            return os.path.join(os.path.join(basePath, directory), file)
+    # directory = os.path.join('assets', 'Profile')
+    # for file in os.listdir(os.path.join(basePath, directory)):
+    #     if file.startswith(fileName) and file.count('-') == 1:
+    #         return os.path.join(os.path.join(basePath, directory), file)
     return "/assets/img/avatars/user.png"

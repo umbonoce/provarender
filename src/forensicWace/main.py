@@ -22,7 +22,7 @@ backupPath = GlobalConstant.backupDefaultPath
 
 phoneNumber = ""
 
-UPLOAD_FOLDER = os.path.join(sys.path[0], 'assets')
+UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename, formato):
@@ -37,7 +37,6 @@ def Home():
     
     if 'fileName' not in session:
         session['inputPath'] = GlobalConstant.noDatabaseSelected
-        app.config['UPLOAD_FOLDER'] = GlobalConstant.noDatabaseSelected
         session['fileName'] = GlobalConstant.noDatabaseSelected
         session['fileSize'] = GlobalConstant.noDatabaseSelected
         session['dbSha256'] = GlobalConstant.noDatabaseSelected
@@ -91,6 +90,10 @@ def InputPath():
 #     session['noOutPathError']  = 0
 
 #     return redirect(url_for('Home'))
+
+@app.route('/data/<path:path>')
+def ServeMedia(path):
+    return send_from_directory('data', path)
 
 @app.route('/blockedContact')
 def BlockedContact():
@@ -230,6 +233,7 @@ def GroupChat(mediaType, groupName):
         
         for file in files:
             path = os.path.dirname(file.filename)
+            basePath = os.path.join(app.config['UPLOAD_FOLDER'], "Media")
             basePath = os.path.join(app.config['UPLOAD_FOLDER'], path)
             if not os.path.exists(basePath):
                 os.makedirs(basePath, exist_ok=True)          
@@ -433,9 +437,13 @@ def GenereteGroupChatReport(groupName):
         newzip.write(certificate, os.path.basename(certificate))
         newzip.write(sha, os.path.basename(sha))
         newzip.write(md5, os.path.basename(md5))
-        if os.path.exists(os.path.join(basePath, groupId)):
-            newzip.write(os.path.join(basePath, groupId) , "Media") 
-
+        mediaPath = os.path.join(basePath, groupId)
+        if os.path.exists(mediaPath):  
+            for dirpath, dirnames, medias in os.walk(mediaPath):  
+                for media in medias:
+                    path= os.path.join(dirpath, media)
+                    newzip.write(path, os.path.join('Media', os.path.basename(media)))
+                    
     memory_file.seek(0)
     return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces + ".zip")
 
@@ -479,7 +487,7 @@ def main():
     serve(app, host="0.0.0.0", port=8080)
     
     # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=True)     
+    # app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()
