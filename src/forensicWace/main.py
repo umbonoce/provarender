@@ -1,5 +1,8 @@
+import datetime
 from io import BytesIO
 import shutil
+from sqlite3 import Timestamp
+import time
 import uuid
 import webbrowser
 
@@ -17,7 +20,7 @@ from zipfile import ZipFile
 from werkzeug import utils
 
 app = Flask(__name__ , static_folder='assets')
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = os.getenv('SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/') 
 
 phoneNumber = ""
 
@@ -47,6 +50,16 @@ def Home():
         session['noDbError']  = 1  
         session['noOutPathError']  = 1
         session['extractedDataList'] = None
+        
+        for i in os.listdir(app.config['UPLOAD_FOLDER']): 
+            # get the location of the file 
+            file_location = os.path.join(os.getcwd(), i) 
+            # file_time is the time when the file is modified 
+            file_time = os.stat(file_location).st_mtime 
+  
+            if(file_time < time.time() - 600): 
+                print(f" Delete : {i}") 
+                os.remove(file_location) 
 
     return render_template('index.html', inputPath=session['serialDb'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
@@ -79,18 +92,6 @@ def InputPath():
                 session['noOutPathError']  = 0
 
     return redirect(url_for('Home'))
-
-# @app.route('/outputPath', methods = ['GET', 'POST'])
-# def OutputPath():
-
-#     if app.config['UPLOAD_FOLDER'] == "":
-#         app.config['UPLOAD_FOLDER'] = session['inputPath'].rsplit('/', 1)[0] + '/'
-#     else:
-#         app.config['UPLOAD_FOLDER'] = app.config['UPLOAD_FOLDER'] + '/'
-
-#     session['noOutPathError']  = 0
-
-#     return redirect(url_for('Home'))
 
 @app.route('/data/<path:path>')
 def ServeMedia(path):
@@ -553,15 +554,15 @@ def generateGroupChatReport(groupName):
 def About():
     return render_template('about.html')
 
-def SetGlobalInOutVar(valueIn, valueOut):
-    global InputPath, OutputPath
-    InputPath = valueIn
-    OutputPath = valueOut
+# def SetGlobalInOutVar(valueIn, valueOut):
+#     global InputPath, OutputPath
+#     InputPath = valueIn
+#     OutputPath = valueOut
 
-def SetGlobalCheckReportVar(valueRep, valueCert):
-    global ReportPath, CertificatePath
-    ReportPath = valueRep
-    CertificatePath  = valueCert
+# def SetGlobalCheckReportVar(valueRep, valueCert):
+#     global ReportPath, CertificatePath
+#     ReportPath = valueRep
+#     CertificatePath  = valueCert
 
 @app.route('/exit')
 def Exit():
@@ -574,15 +575,13 @@ def Exit():
     session['noDbError']  = 1
     session['noOutPathError']  = 1
 
-    SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
-    SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
-
-    phoneNumber = ""
+    #SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
+    #SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     return redirect(url_for('Home'))
 
 def main():
-    SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
-    SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
+    #SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
+    #SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     
     from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
