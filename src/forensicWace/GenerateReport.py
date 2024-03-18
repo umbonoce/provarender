@@ -1,16 +1,37 @@
 import os
 import sys
+
+from reportlab.lib.styles import getSampleStyleSheet
 #import forensicWace.Service as Service    # Comment this to develop on local. Add to create package to download and install pip
 import Service    # Uncomment this to develop on local. Add to create package to download and install pip
 
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle, Spacer
 from reportlab.lib.colors import HexColor
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen import canvas, textobject
+from reportlab.pdfbase import pdfmetrics
+
+from reportlab.pdfbase.ttfonts import TTFont
+
+from emojipy import Emoji
+Emoji.unicode_alt = False
+import re
 
 basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
+
+def replace_with_emoji_pdf(text, size):
+    """
+    Reportlab's Paragraph doesn't accept normal html <image> tag's attributes
+    like 'class', 'alt'. Its a little hack to remove those attrbs
+    """
+    if "<img" in Emoji.to_image(text):
+        text = Emoji.to_image(text)
+        text = text.replace('class="emojione "', 'height="' + str(size) + '" width="' + str(size) + '"')
+        text = text.replace('style=""', '')
+        text = re.sub('alt="'+Emoji.shortcode_regexp+'"', '', text)
+    return text
 
 def CreateHorizontalDocHeaderAndFooter(canvas, doc):
     canvas.saveState()
@@ -100,7 +121,7 @@ def PrivateChatReport(outputPath, phoneNumber, extractedData):
 
     # Create the canvas for the report
     c = canvas.Canvas(outFileName, pagesize=A4)
-
+    
     # Get starting positions to start writing
     x_offset = left_margin
     y_offset = c._pagesize[1] - top_margin
@@ -337,8 +358,20 @@ def PrivateChatReport(outputPath, phoneNumber, extractedData):
 
         # Print the message into the box
         for line in lines:
-            c.drawString(x_offset + 20, y_offset + message_box_height / 2 - 6, line)
+            styles = getSampleStyleSheet()
+            styles["Title"].fontName = 'Helvetica'
+            styles["Title"].fontSize = 12
+            style = styles["Title"]
+            content = replace_with_emoji_pdf(line, style.fontSize)
+            para = Paragraph(content, style)
+            para.wrap(message_box_width, message_box_height)
+            para.drawOn(c,  x_offset, y_offset + message_box_height / 2 - 12)
             y_offset -= 16
+
+        if chat['mediaPath'] is not None:
+            c.setFont("Helvetica", 8)
+            c.drawString(x_offset, y_offset, "Media path: " + chat['mediaPath'])
+            y_offset -= 12
 
         if chat['user'] is None:
             c.setFont("Helvetica", 8)
@@ -383,7 +416,7 @@ def GpsLocations(outputPath, fileName, extractedDataList):
         data.append([Service.FormatPhoneNumber(extractedData["Sender"]),
                      Service.FormatPhoneNumber(extractedData["Receiver"]), extractedData["MessageDate"], extractedData["Latitude"], extractedData["Longitude"]])
 
-    outFileName = outputPath + fileName + "-GpsLocations.pdf"
+    outFileName = os.path.join(outputPath, fileName + "-BlockedContacts.pdf")
 
     # Configurazione del documento
     doc = SimpleDocTemplate(outFileName, pagesize=A4)
@@ -555,7 +588,6 @@ def GroupListReport(outputPath, fileName, extractedDataList):
         return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")
-
         
 def GroupChatReport(outputPath, groupName, extractedData):
     
@@ -826,8 +858,20 @@ def GroupChatReport(outputPath, groupName, extractedData):
 
         # Print the message into the box
         for line in lines:
-            c.drawString(x_offset + 20, y_offset + message_box_height / 2 - 6, line)
+            styles = getSampleStyleSheet()
+            styles["Title"].fontName = 'Helvetica'
+            styles["Title"].fontSize = 12
+            style = styles["Title"]
+            content = replace_with_emoji_pdf(line, style.fontSize)
+            para = Paragraph(content, style)
+            para.wrap(message_box_width, message_box_height)
+            para.drawOn(c,  x_offset, y_offset + message_box_height / 2 - 12 )
             y_offset -= 16
+
+        if chat['mediaPath'] is not None:
+            c.setFont("Helvetica", 8)
+            c.drawString(x_offset, y_offset, "Media path: " + chat['mediaPath'])
+            y_offset -= 12
 
         if chat['user'] is None:
             c.setFont("Helvetica", 8)
@@ -941,7 +985,7 @@ def CalculateMediaSHA256(directory_path, outputPath, fileName):
             file_path = os.path.join(root, file_name)
             relative_path = os.path.relpath(file_path, directory_path)
             print(relative_path)
-            data.append([os.path.basename(file_path), Service.CalculateSHA256(file_path)])
+            data.append([relative_path, Service.CalculateSHA256(file_path)])
 
     outFileName = os.path.join(outputPath, fileName + "-Media-SHA256.pdf")
 
@@ -974,7 +1018,7 @@ def CalculateMediaSHA256(directory_path, outputPath, fileName):
     # Scrittura del documento
     doc.build(fileElements, onFirstPage=CreateHorizontalDocHeaderAndFooter)
 
-    Service.CertificateReport(outFileName)
+    certificateFile = Service.CertificateReport(outFileName)
 
     # Verifica l'esistenza del file PDF appena creato.
     # SE esiste lo apre automaticamente
@@ -989,7 +1033,7 @@ def CalculateMediaSHA256(directory_path, outputPath, fileName):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
-        return outFileName
+        return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")
 
@@ -1002,7 +1046,7 @@ def CalculateMediaMD5(directory_path, outputPath, fileName):
             file_path = os.path.join(root, file_name)
             relative_path = os.path.relpath(file_path, directory_path)
             print(relative_path)
-            data.append([os.path.basename(file_path), Service.CalculateMD5(file_path)])
+            data.append([relative_path, Service.CalculateMD5(file_path)])
 
     outFileName = os.path.join(outputPath, fileName + "-Media-MD5.pdf")
 
@@ -1035,7 +1079,7 @@ def CalculateMediaMD5(directory_path, outputPath, fileName):
     # Scrittura del documento
     doc.build(fileElements, onFirstPage=CreateHorizontalDocHeaderAndFooter)
 
-    Service.CertificateReport(outFileName)
+    certificateFile = Service.CertificateReport(outFileName)
 
     # Verifica l'esistenza del file PDF appena creato.
     # SE esiste lo apre automaticamente
@@ -1050,6 +1094,6 @@ def CalculateMediaMD5(directory_path, outputPath, fileName):
             os.system("open " + outFileName)
         # elif sys.platform.startswith('linux'):
         # Linux
-        return outFileName
+        return outFileName, certificateFile
     else:
         print("Errore: il file PDF non è stato creato.")

@@ -142,10 +142,13 @@ def GetSentDateTime(blob):
             if result.field == 3:
                 field3Value = result.data
                 break
-
-        gmtDateTime = datetime.fromtimestamp(field3Value, tz=timezone.utc)
-        messageDateTime = gmtDateTime.strftime('%Y-%m-%d %H:%M:%S %Z')
-
+        
+        if field3Value is not None:
+            gmtDateTime = datetime.fromtimestamp(field3Value, tz=timezone.utc)
+            messageDateTime = gmtDateTime.strftime('%Y-%m-%d %H:%M:%S %Z')
+        else:
+            messageDateTime = "Information not available"
+            
         return messageDateTime
     else:
         return GlobalConstant.infoNotAvailable
