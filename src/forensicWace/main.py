@@ -53,11 +53,11 @@ def Home():
         
         for i in os.listdir(app.config['UPLOAD_FOLDER']): 
             # get the location of the file 
-            file_location = os.path.join(os.getcwd(), i) 
+            file_location = os.path.join(app.config['UPLOAD_FOLDER'], i) 
             # file_time is the time when the file is modified 
             file_time = os.stat(file_location).st_mtime 
   
-            if(file_time < time.time() - 600): 
+            if(file_time < time.time() - 1800): 
                 print(f" Delete : {i}") 
                 os.remove(file_location) 
 
