@@ -1,6 +1,9 @@
+import io
 import os
 import sqlite3
-from flask import flash
+import tempfile
+from cryptography.fernet import Fernet
+from flask import flash, session
 import GlobalConstant
 import subprocess
 import shutil
@@ -9,18 +12,37 @@ import shutil
 from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
+    
+    fernet = Fernet(session['session_key'])
+    with open(inputPath, 'rb') as enc_file:
+        encrypted = enc_file.read()
+        enc_file.close()
+        
+    decrypted = fernet.decrypt(encrypted)
+    
+    with open(inputPath, "wb") as binary_file:
+        binary_file.write(decrypted)
+        binary_file.close()
+        
     try:
-        # Connessione al database
+        # Connessione al database 
         conn = sqlite3.connect(inputPath)        
         cursor = conn.cursor()
         results = cursor.execute(query)
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
-        return extractedData
+        return extractedData           
+            
     except sqlite3.Error as error:
         print("Failed to read data from sqlite table", error)    
     except Exception as error:
         print("General error", error)
     finally:
+        encrypted = fernet.encrypt(decrypted)
+
+        with open(inputPath, "wb") as binary_file:
+            binary_file.write(encrypted)
+            binary_file.close()
+
         if conn:
             conn.close()
             print("The SQLite connection is closed")

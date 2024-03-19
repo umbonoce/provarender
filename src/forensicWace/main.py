@@ -1,10 +1,13 @@
 import datetime
+import hashlib
 from io import BytesIO
 import shutil
 from sqlite3 import Timestamp
 import time
 import uuid
 import webbrowser
+
+from cryptography import fernet
 
 import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
 import os
@@ -18,6 +21,7 @@ from flask import Flask, flash, render_template, send_file, send_from_directory,
 from datetime import timedelta
 from zipfile import ZipFile
 from werkzeug import utils
+from cryptography.fernet import Fernet
 
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = os.getenv('SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/') 
@@ -38,6 +42,7 @@ def Home():
     app.permanent_session_lifetime = timedelta(minutes=10)
     
     if 'fileName' not in session:
+        session['session_key'] = Fernet.generate_key()
         session['inputPath'] = GlobalConstant.noDatabaseSelected
         session['serialDb'] = GlobalConstant.noDatabaseSelected
         session['fileName'] = GlobalConstant.noDatabaseSelected
@@ -54,7 +59,7 @@ def Home():
         for i in os.listdir(app.config['UPLOAD_FOLDER']): 
             # get the location of the file 
             file_location = os.path.join(app.config['UPLOAD_FOLDER'], i) 
-            # file_time is the time when the file is modified 
+            # file_time is the time when the file is modified
             file_time = os.stat(file_location).st_mtime 
   
             if(file_time < time.time() - 1800): 
@@ -81,13 +86,17 @@ def InputPath():
             if filename == "":
                 session['inputPath'] = GlobalConstant.noDatabaseSelected
             else:
+                original = f.read()
+                session['dbMd5'] = hashlib.md5(original).hexdigest()
+                session['dbSha256'] = hashlib.sha256(original).hexdigest()
+                session['fileSize'] = str(round( len(original) / (1024 * 1024) , 2 )) + ' MB'
                 session['serialDb'] = str(uuid.uuid4())
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])
-                f.save(session['inputPath'])
+                fernet = Fernet(session['session_key'])
+                encrypted = fernet.encrypt(original)
+                with open(session['inputPath'], "wb") as binary_file:
+                    binary_file.write(encrypted)
                 session['fileName'] = filename
-                session['fileSize'] = str(round(Service.GetFileSize(session['inputPath']), 1)) + " MB"
-                session['dbSha256'] = Service.CalculateSHA256(session['inputPath'])
-                session['dbMd5']  = Service.CalculateMD5(session['inputPath'])
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
 
@@ -126,7 +135,7 @@ def BlockedContactReport():
         if os.path.exists(certificateFile):
             os.remove(certificateFile)
 
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="blockedContacReportExtraction.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name=session['serialDb'] + "-blockedContacReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -169,7 +178,7 @@ def GroupListReport():
         if os.path.exists(certificateFile):
             os.remove(certificateFile)
 
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="groupListReportExtraction.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name=session['serialDb'] + "-groupListReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -213,7 +222,7 @@ def GpsLocationReport():
         if os.path.exists(certificateFile):
             os.remove(certificateFile)
 
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="gpsLocationReportExtraction.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name=session['serialDb'] + "-gpsLocationReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -349,7 +358,7 @@ def CalculateDbHash():
         if os.path.exists(certificateFile):
             os.remove(certificateFile)
             
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name = session['fileName'] + "-DbHash.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name = session['serialDb'] + "-DbHash.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -372,7 +381,7 @@ def ChatListReport():
         if os.path.exists(certificateFile):
             os.remove(certificateFile)
             
-        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name="chatListReportExtraction.zip")
+        return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name=session['serialDb'] + "-chatListReportExtraction.zip")
     else:
         return redirect(url_for('Home'))
 
@@ -499,7 +508,7 @@ def generatePrivateChatReport(phoneNumber):
     if os.path.exists(mediaPath):
         shutil.rmtree(mediaPath)
         
-    return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= phoneNumber + ".zip")
+    return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= phoneNumber + '-' + session['serialDb'] + ".zip")
 
 @app.route('/generateGroupChatReport/<groupName>')
 def generateGroupChatReport(groupName):
@@ -547,7 +556,7 @@ def generateGroupChatReport(groupName):
     if os.path.exists(mediaPath):
         shutil.rmtree(mediaPath)
         
-    return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces + ".zip")
+    return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces  + '-' + session['serialDb'] +  ".zip")
 
 
 @app.route('/about')
@@ -566,7 +575,7 @@ def About():
 
 @app.route('/exit')
 def Exit():
-    
+    session['serialDb'] = GlobalConstant.noDatabaseSelected
     session['inputPath'] = GlobalConstant.noDatabaseSelected
     session['fileName'] = GlobalConstant.noDatabaseSelected
     session['fileSize'] = GlobalConstant.noDatabaseSelected
@@ -587,7 +596,7 @@ def main():
     serve(app, host="0.0.0.0", port=8080)
     
     # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=True)     
+    # app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()

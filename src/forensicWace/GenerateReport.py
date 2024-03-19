@@ -14,8 +14,9 @@ from reportlab.pdfgen import canvas, textobject
 from reportlab.pdfbase import pdfmetrics
 
 from reportlab.pdfbase.ttfonts import TTFont
-
+from flask import session
 from emojipy import Emoji
+
 Emoji.unicode_alt = False
 import re
 
@@ -913,7 +914,7 @@ def GroupChatReport(outputPath, groupName, extractedData):
 
 def DbHash(inputPath, outputPath, fileName):
 
-    data = [["Database file name", "Hash code - SHA256"], [fileName, Service.CalculateSHA256(inputPath)]]
+    data = [["Database file name", "Hash code - SHA256"], [fileName, session['dbSha256'] ]]
 
     outFileName = os.path.join(outputPath, fileName + "-DatabaseHash.pdf")
 
@@ -946,7 +947,7 @@ def DbHash(inputPath, outputPath, fileName):
 
     fileElements.append(Spacer(1, 20))  # 1 unità di larghezza e 20 unità di altezza)
 
-    data = [["Database file name", "Hash code - MD5"], [fileName, Service.CalculateMD5(inputPath)]]
+    data = [["Database file name", "Hash code - MD5"], [fileName, session['dbMd5'] ]]
 
     table = Table(data, colWidths=[350, 350])
 
