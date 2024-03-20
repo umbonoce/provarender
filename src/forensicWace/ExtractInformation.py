@@ -14,22 +14,25 @@ from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
     
-    fernet = Fernet(session['session_key'])
-    with open(inputPath, 'rb') as enc_file:
-        encrypted = enc_file.read()
-        enc_file.close()
-        
-    decrypted = fernet.decrypt(encrypted)
-    
-    with open(inputPath, "wb") as binary_file:
-        binary_file.write(decrypted)
-        binary_file.close()
+ 
+    with open(inputPath, "rb") as enc_file:
+        encrypted = enc_file.read() 
         
     gc.collect()
+    
+    fernet = Fernet(session['session_key'])    
 
+    decrypted = fernet.decrypt(encrypted)
+
+    with open(inputPath + '.sqlite', "wb") as binary_file:
+        binary_file.write(decrypted)
+        binary_file.close()
+
+    gc.collect()
+        
     try:
         # Connessione al database 
-        conn = sqlite3.connect(inputPath)        
+        conn = sqlite3.connect(inputPath + '.sqlite')        
         cursor = conn.cursor()
         results = cursor.execute(query)
         extractedData = [dict(zip([column[0] for column in cursor.description], row)) for row in results]
@@ -47,11 +50,12 @@ def ExecuteQuery(inputPath,query):
             binary_file.close()
                 
         gc.collect()
-
         if conn:
             conn.close()
             print("The SQLite connection is closed")
-            
+        
+        os.remove(inputPath + '.sqlite')
+         
 
 def GetChatList(inputPath):
     if inputPath != "":

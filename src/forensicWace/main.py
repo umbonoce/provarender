@@ -561,20 +561,9 @@ def generateGroupChatReport(groupName):
         
     return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= groupNameNoSpaces  + '-' + session['serialDb'] +  ".zip")
 
-
 @app.route('/about')
 def About():
     return render_template('about.html')
-
-# def SetGlobalInOutVar(valueIn, valueOut):
-#     global InputPath, OutputPath
-#     InputPath = valueIn
-#     OutputPath = valueOut
-
-# def SetGlobalCheckReportVar(valueRep, valueCert):
-#     global ReportPath, CertificatePath
-#     ReportPath = valueRep
-#     CertificatePath  = valueCert
 
 @app.route('/exit')
 def Exit():
@@ -587,13 +576,9 @@ def Exit():
     session['noDbError']  = 1
     session['noOutPathError']  = 1
 
-    #SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
-    #SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     return redirect(url_for('Home'))
 
 def main():
-    #SetGlobalInOutVar(GlobalConstant.selectDatabaseFile, GlobalConstant.selectOutputPath)
-    #SetGlobalCheckReportVar(GlobalConstant.noReportSelected, GlobalConstant.noCertificateSelected)
     
     from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
