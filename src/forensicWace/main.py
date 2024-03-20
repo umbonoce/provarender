@@ -1,4 +1,5 @@
 import datetime
+import gc
 import hashlib
 from io import BytesIO
 import shutil
@@ -96,9 +97,11 @@ def InputPath():
                 encrypted = fernet.encrypt(original)
                 with open(session['inputPath'], "wb") as binary_file:
                     binary_file.write(encrypted)
+                    binary_file.close()
                 session['fileName'] = filename
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
+                gc.collect()
 
     return redirect(url_for('Home'))
 

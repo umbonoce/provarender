@@ -1,3 +1,4 @@
+import gc
 import io
 import os
 import sqlite3
@@ -24,6 +25,8 @@ def ExecuteQuery(inputPath,query):
         binary_file.write(decrypted)
         binary_file.close()
         
+    gc.collect()
+
     try:
         # Connessione al database 
         conn = sqlite3.connect(inputPath)        
@@ -42,6 +45,8 @@ def ExecuteQuery(inputPath,query):
         with open(inputPath, "wb") as binary_file:
             binary_file.write(encrypted)
             binary_file.close()
+                
+        gc.collect()
 
         if conn:
             conn.close()
