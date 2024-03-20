@@ -32,8 +32,6 @@ app.secret_key = os.getenv('SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/')
 
 phoneNumber = ""
 
-BLOCKSIZE = 4 * 1024
-ENCRYPTED_HEADER_LENGTH = 4
 UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -41,43 +39,21 @@ def allowed_file(filename, formato):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in formato
 
-def encDb(file):
-    """
-    Encrypt file in place.
-    """
+def encrypt_database(file):
+
     file.seek(0)
     with open(session['inputPath'], 'wb') as encrypted_file:
         while True:
-            original = file.read(BLOCKSIZE)
+            original = file.read(GlobalConstant.BLOCKSIZE)
             if not original:
                 break
             fernet = Fernet(session['session_key'])
             encrypted = fernet.encrypt(original)
             l = len(encrypted)
-            l_bytes = l.to_bytes(ENCRYPTED_HEADER_LENGTH, 'big')
+            l_bytes = l.to_bytes(GlobalConstant.ENCRYPTED_HEADER_LENGTH, 'big')
             encrypted_file.write(l_bytes)
             encrypted_file.write(encrypted)
             
-def decfile(file):
-    """
-    Decrypt files in place.
-    """
-
-    fd, path = mkstemp() # make a temporary file
-
-    with open(file, 'rb') as encrypted_file, \
-    os.fdopen (fd, 'wb') as original_file:
-        while True:
-            l_bytes = encrypted_file.read(ENCRYPTED_HEADER_LENGTH)
-            if not l_bytes:
-                break
-            l = int.from_bytes(l_bytes, 'big')
-            encrypted = encrypted_file.read(l)
-            fernet = Fernet(session['session_key'])
-            decrypted = fernet.decrypt(encrypted)
-            original_file.write(decrypted)
-    os.replace(path, file)
-    
 @app.route('/')
 def Home():
 
@@ -136,7 +112,7 @@ def InputPath():
                 session['fileSize'] = str(round( len(original) / (1024 * 1024) , 2 )) + ' MB'
                 session['serialDb'] = str(uuid.uuid4())
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])                      
-                encDb(f)
+                encrypt_database(f)
                 f.save(session['inputPath'] + '.sqlite')
                 session['fileName'] = filename
                 session['noDbError']  = 0

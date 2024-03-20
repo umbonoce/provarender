@@ -4,32 +4,17 @@ import os
 import sqlite3
 import struct
 import tempfile
-from cryptography.fernet import Fernet
 from flask import flash, session
 import GlobalConstant
 import subprocess
 import shutil
-
-#from tkinter import messagebox
 from pathlib import Path
+from cryptography.fernet import Fernet
 
 def ExecuteQuery(inputPath,query):
     
-    # fernet = Fernet(session['session_key'])    
+    decrypt_database()
 
-    # with open(inputPath, "rb") as enc_file,  open(inputPath + '.sqlite', "wb") as binary_file:
-    #     while True:
-    #         size_data = enc_file.read(4) 
-    #         if len(size_data) == 0:
-    #             enc_file.close()
-    #             binary_file.close()
-    #             break      
-    #         enc_chunk = enc_file.read(struct.unpack('<I', size_data)[0])
-    #         decrypted = fernet.decrypt(enc_chunk)
-    #         binary_file.write(decrypted)
-       
-    # gc.collect()
-        
     try:
         # Connessione al database 
         conn = sqlite3.connect(inputPath + '.sqlite')        
@@ -136,6 +121,19 @@ def GetGroupList(inputPath):
         query = GlobalConstant.queryGroupList
         extractedData = ExecuteQuery(inputPath, query)
         return extractedData
+
+def decrypt_database():
+
+    with open(session['inputPath'], 'rb') as encrypted_file, open(session['inputPath'] + '.sqlite', 'wb') as original_file:
+        while True:
+            l_bytes = encrypted_file.read(GlobalConstant.ENCRYPTED_HEADER_LENGTH)
+            if not l_bytes:
+                break
+            l = int.from_bytes(l_bytes, 'big')
+            encrypted = encrypted_file.read(l)
+            fernet = Fernet(session['session_key'])
+            decrypted = fernet.decrypt(encrypted)
+            original_file.write(decrypted)
 
 # def ExtractFullBackup(backupPath, udid, outputPath):
 #     basePath = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
