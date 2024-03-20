@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Forensic Wace - Loading...</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/Forensic_WACE.css">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <style>
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: -56px 0 0 -56px;
+        }
+
+            .loader:after {
+                content: " ";
+                display: block;
+                width: 110px;
+                height: 110px;
+                border-radius: 50%;
+                border: 1px solid;
+                border-color: #0aa13a transparent #47a90e transparent;
+                animation: ring 1.2s linear infinite;
+            }
+
+        @keyframes ring {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body style="background: #f8f9fc;">
+    <nav class="navbar navbar-light navbar-expand-md" style="width: 100%;">
+        <div name="page-top" class="container-fluid"><a href="/"><img src="assets/img/Logo%20Forensic%20WACE.png" style="height: 45px;"></a><a class="btn btn-danger btn-icon-split" role="button" href="/exit"><span class="text-white-50 icon"><i class="fas fa-sign-out-alt"></i></span><span class="text-white text">EXIT</span></a></div>
+    </nav>
+    <div class="loader"></div>
+</body>
+
+</html>
+
+<script>
+        window.location.href = '/{{ NomePagina }}';  
+</script>

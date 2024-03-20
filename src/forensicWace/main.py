@@ -87,6 +87,10 @@ def Home():
 
     return render_template('index.html', inputPath=session['serialDb'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
+@app.route('/loading-<nomePagina>')
+def Loading(nomePagina):
+    return render_template("loading.html", NomePagina = nomePagina)
+
 @app.route('/inputPath', methods = ['GET', 'POST'])
 def InputPath():
     global noDbError, noOutPathError
@@ -594,10 +598,10 @@ def Exit():
     return redirect(url_for('Home'))
 
 def main():
-    
+    #RELEASE
     from waitress import serve
     serve(app, host="0.0.0.0", port=8080)
-    
+    #DEBUG
     # webbrowser.open('http://localhost:5000') 
     # app.run(debug=True, use_reloader=False)     
 
