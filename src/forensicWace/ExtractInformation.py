@@ -2,6 +2,7 @@ import gc
 import io
 import os
 import sqlite3
+import struct
 import tempfile
 from cryptography.fernet import Fernet
 from flask import flash, session
@@ -14,21 +15,20 @@ from pathlib import Path
 
 def ExecuteQuery(inputPath,query):
     
- 
-    with open(inputPath, "rb") as enc_file:
-        encrypted = enc_file.read() 
-        
-    gc.collect()
-    
-    fernet = Fernet(session['session_key'])    
+    # fernet = Fernet(session['session_key'])    
 
-    decrypted = fernet.decrypt(encrypted)
-
-    with open(inputPath + '.sqlite', "wb") as binary_file:
-        binary_file.write(decrypted)
-        binary_file.close()
-
-    gc.collect()
+    # with open(inputPath, "rb") as enc_file,  open(inputPath + '.sqlite', "wb") as binary_file:
+    #     while True:
+    #         size_data = enc_file.read(4) 
+    #         if len(size_data) == 0:
+    #             enc_file.close()
+    #             binary_file.close()
+    #             break      
+    #         enc_chunk = enc_file.read(struct.unpack('<I', size_data)[0])
+    #         decrypted = fernet.decrypt(enc_chunk)
+    #         binary_file.write(decrypted)
+       
+    # gc.collect()
         
     try:
         # Connessione al database 
@@ -43,13 +43,7 @@ def ExecuteQuery(inputPath,query):
     except Exception as error:
         print("General error", error)
     finally:
-        encrypted = fernet.encrypt(decrypted)
-
-        with open(inputPath, "wb") as binary_file:
-            binary_file.write(encrypted)
-            binary_file.close()
                 
-        gc.collect()
         if conn:
             conn.close()
             print("The SQLite connection is closed")

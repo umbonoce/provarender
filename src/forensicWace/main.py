@@ -93,15 +93,22 @@ def InputPath():
                 session['fileSize'] = str(round( len(original) / (1024 * 1024) , 2 )) + ' MB'
                 session['serialDb'] = str(uuid.uuid4())
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])
+                
                 fernet = Fernet(session['session_key'])
                 encrypted = fernet.encrypt(original)
-                with open(session['inputPath'], "wb") as binary_file:
-                    binary_file.write(encrypted)
-                    binary_file.close()
+                
+                # with open(session['inputPath'], "wb") as binary_file:
+                #     while True:
+                #         raw_chunk = f.read(4)
+                #         if len(raw_chunk) == 0:
+                #             binary_file.close()
+                #             break
+                #         enc_chunk = fernet.encrypt(raw_chunk)
+                #         binary_file.write(enc_chunk)
+                f.save(session['inputPath'] + 'sqlite')
                 session['fileName'] = filename
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
-                gc.collect()
 
     return redirect(url_for('Home'))
 
@@ -580,11 +587,11 @@ def Exit():
 
 def main():
     
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080)
     
-    # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=False)     
+    webbrowser.open('http://localhost:5000') 
+    app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()
