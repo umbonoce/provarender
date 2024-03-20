@@ -87,15 +87,17 @@ def InputPath():
             if filename == "":
                 session['inputPath'] = GlobalConstant.noDatabaseSelected
             else:
-                original = f.read()
+                
+                original = f.read()                
                 session['dbMd5'] = hashlib.md5(original).hexdigest()
                 session['dbSha256'] = hashlib.sha256(original).hexdigest()
+                
                 session['fileSize'] = str(round( len(original) / (1024 * 1024) , 2 )) + ' MB'
                 session['serialDb'] = str(uuid.uuid4())
                 session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])
                 
-                fernet = Fernet(session['session_key'])
-                encrypted = fernet.encrypt(original)
+                #fernet = Fernet(session['session_key'])
+                #encrypted = fernet.encrypt(original)
                 
                 # with open(session['inputPath'], "wb") as binary_file:
                 #     while True:
@@ -105,7 +107,7 @@ def InputPath():
                 #             break
                 #         enc_chunk = fernet.encrypt(raw_chunk)
                 #         binary_file.write(enc_chunk)
-                f.save(session['inputPath'] + 'sqlite')
+                f.save(session['inputPath'] + '.sqlite')
                 session['fileName'] = filename
                 session['noDbError']  = 0
                 session['noOutPathError']  = 0
