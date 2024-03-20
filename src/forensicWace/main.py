@@ -2,8 +2,11 @@ import datetime
 import gc
 import hashlib
 from io import BytesIO
+from multiprocessing import Pool
 import shutil
 from sqlite3 import Timestamp
+from tempfile import mkstemp
+from threading import Lock
 import time
 import uuid
 import webbrowser
@@ -29,6 +32,8 @@ app.secret_key = os.getenv('SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/')
 
 phoneNumber = ""
 
+BLOCKSIZE = 4 * 1024
+ENCRYPTED_HEADER_LENGTH = 4
 UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -36,6 +41,43 @@ def allowed_file(filename, formato):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in formato
 
+def encDb(file):
+    """
+    Encrypt file in place.
+    """
+    file.seek(0)
+    with open(session['inputPath'], 'wb') as encrypted_file:
+        while True:
+            original = file.read(BLOCKSIZE)
+            if not original:
+                break
+            fernet = Fernet(session['session_key'])
+            encrypted = fernet.encrypt(original)
+            l = len(encrypted)
+            l_bytes = l.to_bytes(ENCRYPTED_HEADER_LENGTH, 'big')
+            encrypted_file.write(l_bytes)
+            encrypted_file.write(encrypted)
+            
+def decfile(file):
+    """
+    Decrypt files in place.
+    """
+
+    fd, path = mkstemp() # make a temporary file
+
+    with open(file, 'rb') as encrypted_file, \
+    os.fdopen (fd, 'wb') as original_file:
+        while True:
+            l_bytes = encrypted_file.read(ENCRYPTED_HEADER_LENGTH)
+            if not l_bytes:
+                break
+            l = int.from_bytes(l_bytes, 'big')
+            encrypted = encrypted_file.read(l)
+            fernet = Fernet(session['session_key'])
+            decrypted = fernet.decrypt(encrypted)
+            original_file.write(decrypted)
+    os.replace(path, file)
+    
 @app.route('/')
 def Home():
 
@@ -90,23 +132,11 @@ def InputPath():
                 
                 original = f.read()                
                 session['dbMd5'] = hashlib.md5(original).hexdigest()
-                session['dbSha256'] = hashlib.sha256(original).hexdigest()
-                
+                session['dbSha256'] = hashlib.sha256(original).hexdigest()         
                 session['fileSize'] = str(round( len(original) / (1024 * 1024) , 2 )) + ' MB'
                 session['serialDb'] = str(uuid.uuid4())
-                session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])
-                
-                #fernet = Fernet(session['session_key'])
-                #encrypted = fernet.encrypt(original)
-                
-                # with open(session['inputPath'], "wb") as binary_file:
-                #     while True:
-                #         raw_chunk = f.read(4)
-                #         if len(raw_chunk) == 0:
-                #             binary_file.close()
-                #             break
-                #         enc_chunk = fernet.encrypt(raw_chunk)
-                #         binary_file.write(enc_chunk)
+                session['inputPath'] = os.path.join(app.config['UPLOAD_FOLDER'], session['serialDb'])                      
+                encDb(f)
                 f.save(session['inputPath'] + '.sqlite')
                 session['fileName'] = filename
                 session['noDbError']  = 0
@@ -589,11 +619,11 @@ def Exit():
 
 def main():
     
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080)
     
-    # webbrowser.open('http://localhost:5000') 
-    # app.run(debug=True, use_reloader=False)     
+    webbrowser.open('http://localhost:5000') 
+    app.run(debug=True, use_reloader=False)     
 
 if __name__ == '__main__':
     main()
