@@ -71,8 +71,9 @@ def Home():
             file_time = os.stat(file_location).st_mtime 
   
             if(file_time < time.time() - 1800): 
-                print(f" Delete : {i}") 
-                os.remove(file_location) 
+                print(f" Delete : {i}")
+                if os.path.isfile():
+                    os.remove(file_location) 
 
     return render_template('index.html', inputPath=session['serialDb'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
 
@@ -476,7 +477,6 @@ def ChatListReport():
 @app.route('/generatePrivateChatReport/<phoneNumber>')
 def generatePrivateChatReport(phoneNumber):
 
-    # counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
     report, certificate = GenerateReport.PrivateChatReport(app.config['UPLOAD_FOLDER'], phoneNumber, session['messages'])
     
     basePath = os.path.join(app.config['UPLOAD_FOLDER'], 'Media')
@@ -523,7 +523,6 @@ def generateGroupChatReport(groupName, groupId):
 
     groupNameNoSpaces = groupName.replace(" ", "")
 
-    # counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
     report, certificate = GenerateReport.GroupChatReport(app.config['UPLOAD_FOLDER'], groupName, session['messages'])
     
     basePath = os.path.join(app.config['UPLOAD_FOLDER'], 'Media')
