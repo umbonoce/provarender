@@ -22,12 +22,12 @@
         <div id="content">
             <div class="container-fluid">
                 <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                    <h3 class="text-dark mb-0">Conversation with: <span style="font-weight: bold">{{ groupName }}</span></h3><a class="btn btn-primary btn-icon-split" href="/generateGroupChatReport/{{ groupName }}" role="button"><span class="text-white-50 icon"><i class="fas fa-file-export"></i></span><span class="text-white text">EXPORT CHAT</span></a>
+                    <h3 class="text-dark mb-0">Conversation with: <span style="font-weight: bold">{{ groupName }}</span></h3><a class="btn btn-primary btn-icon-split" href="/generateGroupChatReport/{{ groupName }}-{{ groupId }}" role="button"><span class="text-white-50 icon"><i class="fas fa-file-export"></i></span><span class="text-white text">EXPORT CHAT</span></a>
                     <form action="/groupChat/0/{{ groupName }}" method="POST"
                           enctype="multipart/form-data">
                         <label for="myGroupChat">
                             <a class="btn btn-block btn-warning btn-icon-split"><span class="text-white-50 icon"><i class="fas  fa-folder-open"></i></span> <span class="text-white text">UPLOAD {{ groupId }} MEDIA FOLDER TO EXPORT ALSO MEDIAS</span></a>
-                            <input id="myGroupChat" style="display:none" onchange="form.submit()" type="file" name="file" webkitdirectory directory multiple/>
+                            <input id="myGroupChat" style="display:none" onchange="form.submit()" type="file" name="file" webkitdirectory directory multiple />
                         </label>
                     </form>
                 </div>
@@ -205,6 +205,46 @@
                                 </div>
                             </a>
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="card card-body">
+                        <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Filters
+
+                        </a>
+                        <div class="collapse" id="collapseExample">
+                            <a class="btn" href="/resetFilters" role="button">
+                                Reset
+                            </a>
+                            <!--<form method="post">-->
+                            <div class="row">
+                                <form>
+                                </form>
+
+                                <div class="form-group text-center align-self-center">
+                                    <label class="active" for="searchKey">Search Keyword</label>
+                                    <form action="/groupChat/0/{{ groupName }}" method="post">
+                                        <input value="{{ searchKey }}" onblur="form.submit()" placeholder="filter by key" style="height: 30px; width: 60%; padding-left: 12px; text-align: center;" class="border rounded-pill" type="text" id="searchKey" name="searchKey">
+                                    </form>
+                                </div>
+                                <div class="form-group text-center align-self-center">
+                                    <label class="active" for="dateBegin">From Date</label>
+                                    <form action="/groupChat/0/{{ groupName }}" method="post">
+                                        <input value="{{ dateBegin }}" onchange="form.submit()" style="height: 30px; width: 60%; padding-left: 12px; text-align: center;" class="border rounded-pill" type="date" id="dateBegin" name="dateBegin">
+                                    </form>
+                                </div>
+                                <div class="form-group text-center align-self-center">
+                                    <label class="active" for="dateEnd">To Date</label>
+                                    <form action="/groupChat/0/{{ groupName }}" method="post">
+                                        <input value="{{ dateEnd }}" onblur="form.submit()" style="height: 30px; width: 60%; padding-left: 12px; text-align: center;" class="border rounded-pill" type="date" id="dateEnd" name="dateEnd">
+                                    </form>
+                                </div>
+
+                            </div>
+                            <!--</form>-->
+                        </div>
+
                     </div>
                 </div>
                 <div class="row">

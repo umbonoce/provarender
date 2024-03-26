@@ -1,4 +1,5 @@
 import gc
+import glob
 import io
 import os
 import sqlite3
@@ -54,14 +55,22 @@ def GetBlockedContacts(inputPath):
         extractedData = ExecuteQuery(inputPath, query)
         return extractedData
 
-def GetPrivateChat(inputPath, mediaType, phoneNumber):
+def GetPrivateChat(inputPath, mediaType, phoneNumber, dateBegin, dateEnd, searchKey):
     if inputPath != "":
         query = GlobalConstant.queryPrivateChatCountersPT1 + phoneNumber + GlobalConstant.queryPrivateChatCountersPT2
 
         counters = ExecuteQuery(inputPath, query)
 
         if mediaType == '0':
-            query = GlobalConstant.queryPrivateChatMessages + phoneNumber + GlobalConstant.queryPrivateChatMessagesPT2
+            query = GlobalConstant.queryPrivateChatMessages + phoneNumber + GlobalConstant.queryCloseLikeQuery
+            if dateBegin != 'null':
+                query += GlobalConstant.queryChatFilterDateBegin + "'"  + dateBegin + "'"
+            if dateEnd != 'null':
+                query += GlobalConstant.queryChatFilterDateEnd + "'" + dateEnd + "'"
+            if searchKey != 'null':
+                query += GlobalConstant.queryChatFilterSearchKey + searchKey + GlobalConstant.queryCloseLikeQuery
+
+            query += GlobalConstant.queryPrivateChatMessagesPT2
         elif mediaType == '1' or mediaType == '38':
             query = GlobalConstant.queryPrivateChatMessages + phoneNumber + GlobalConstant.queryPrivateChatImagesPT2
         elif mediaType == '2' or mediaType == '39':
@@ -83,7 +92,7 @@ def GetPrivateChat(inputPath, mediaType, phoneNumber):
 
         return counters, extractedData
 
-def GetGroupChat(inputPath, mediaType, groupName):
+def GetGroupChat(inputPath, mediaType, groupName, dateBegin, dateEnd, searchKey):
     if inputPath != "":
         query = GlobalConstant.queryGroupChatCountersPT1 + groupName + GlobalConstant.queryGroupChatCountersPT2
 
@@ -92,9 +101,18 @@ def GetGroupChat(inputPath, mediaType, groupName):
         query = GlobalConstant.queryGroupChatIdPT1 + groupName + GlobalConstant.queryGroupChatIdPT2
 
         groupId = ExecuteQuery(inputPath, query)
-
+        
         if mediaType == '0':
-            query = GlobalConstant.queryGroupChatMessages + groupName + GlobalConstant.queryGroupChatMessagesPT2
+            query = GlobalConstant.queryGroupChatMessages + groupName + GlobalConstant.queryCloseLikeQuery
+            if dateBegin != 'null':
+                query += GlobalConstant.queryChatFilterDateBegin + "'"  + dateBegin + "'"
+            if dateEnd != 'null':
+                query += GlobalConstant.queryChatFilterDateEnd + "'" + dateEnd + "'"
+            if searchKey != 'null':
+                query += GlobalConstant.queryChatFilterSearchKey + searchKey + GlobalConstant.queryCloseLikeQuery
+            
+            query += GlobalConstant.queryGroupChatMessagesPT2
+
         elif mediaType == '1' or mediaType == '38':
             query = GlobalConstant.queryGroupChatMessages + groupName + GlobalConstant.queryGroupChatImagesPT2
         elif mediaType == '2' or mediaType == '39':

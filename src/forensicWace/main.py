@@ -1,26 +1,12 @@
-import datetime
-import gc
-import hashlib
 from io import BytesIO
-from multiprocessing import Pool
 import shutil
-from sqlite3 import Timestamp
-from tempfile import mkstemp
-from threading import Lock
 import time
 import uuid
 import webbrowser
-
-from cryptography import fernet
-
-import ExtractInformation    # Uncomment this to develop on local. Add to create package to download and install pip
+import hashlib
+import ExtractInformation, GenerateReport, GlobalConstant, Service
 import os
 import sys
-import GenerateReport    # Uncomment this to develop on local. Add to create package to download and install pip
-import Service    # Uncomment this to develop on local. Add to create package to download and install pip
-import flask
-import GlobalConstant    # Uncomment this to develop on local. Add to create package to download and install pip
-
 from flask import Flask, flash, render_template, send_file, send_from_directory, session, redirect, url_for, request
 from datetime import timedelta
 from zipfile import ZipFile
@@ -30,7 +16,7 @@ from cryptography.fernet import Fernet
 app = Flask(__name__ , static_folder='assets')
 app.secret_key = os.getenv('SECRET_KEY', b'_5#y2L"F4Q8z\n\xec]/') 
 
-phoneNumber = ""
+phoneNumber, dateBegin, dateEnd, searchKey = "", "null", "null", "null"
 
 UPLOAD_FOLDER = os.path.join(sys.path[0], 'data')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -40,7 +26,6 @@ def allowed_file(filename, formato):
            filename.rsplit('.', 1)[1].lower() in formato
 
 def encrypt_database(file):
-
     file.seek(0)
     with open(session['inputPath'], 'wb') as encrypted_file:
         while True:
@@ -70,6 +55,10 @@ def Home():
         session['dbMd5']  = GlobalConstant.noDatabaseSelected     
         session['reportPath'] = GlobalConstant.noReportSelected
         session['certificatePath']  = GlobalConstant.noCertificateSelected
+        session['dateBegin'] = "null"
+        session['dateEnd'] = "null"
+        session['searchKey'] = "null"
+        session['messages'] = "null"
         session['reportStatus']  = 0
         session['noDbError']  = 1  
         session['noOutPathError']  = 1
@@ -250,64 +239,141 @@ def GpsLocationReport():
 
 @app.route("/insertPhoneNumber", methods=["GET", "POST"])
 def InsertPhoneNumber():
-    global phoneNumber
-
+    global phoneNumber, dateBegin, dateEnd, searchKey 
+    
     if session['noDbError']  != 1:
 
         if request.method == "POST":
-            if request.form["button"] == "del":
-                phoneNumber = phoneNumber[:-1]
-            else:
-                phoneNumber += request.form["button"]
+            if "phoneNumber" in request.form:
+                phoneNumber = request.form["phoneNumber"] 
+                
+            if "dateBegin" in request.form:
+                dateBegin = request.form["dateBegin"] 
+               
+            if "dateEnd" in request.form:
+                dateEnd = request.form["dateEnd"] 
+                       
+            if "searchKey" in request.form:
+                searchKey = request.form["searchKey"] 
 
-        return render_template("inputPhoneNumber.html", phoneNumber=phoneNumber)
+            if "button" in request.form:            
+                if request.form["button"] == "del":
+                    phoneNumber = phoneNumber[:-1]
+                else:
+                    phoneNumber += request.form["button"]
+
+
+        return render_template("inputPhoneNumber.html", phoneNumber=phoneNumber, dateBegin=dateBegin, dateEnd = dateEnd, searchKey=searchKey)
     else:
         return redirect(url_for('Home'))
+
+@app.route('/resetFilters')
+def ResetFilters():
+                
+    session['dateBegin'] = "null"
+               
+    session['dateEnd']  = "null"
+                       
+    session['searchKey'] = "null"
+    
+    return redirect("/".join(request.referrer.split("/")[:6]))
 
 @app.route('/privateChat/<mediaType>/<phoneNumber>' , methods = ['GET', 'POST'])
 def PrivateChat(mediaType, phoneNumber):
         
     if request.method =='POST':
-        files = request.files.getlist("file")
         
-        for file in files:
-            path = os.path.dirname(file.filename)
-            filename = os.path.basename(file.filename)
-            basePath = os.path.join(app.config['UPLOAD_FOLDER'], "Media")
-            basePath = os.path.join(basePath, path)
-            if not os.path.exists(basePath):
-                os.makedirs(basePath, exist_ok=True)          
-            file.save(os.path.join(basePath, utils.secure_filename(filename) ))
+        if "dateBegin" in request.form:
+            session['dateBegin'] = request.form["dateBegin"] 
+               
+        if "dateEnd" in request.form:
+            session['dateEnd']  = request.form["dateEnd"] 
+                       
+        if "searchKey" in request.form:
+            session['searchKey'] = request.form["searchKey"]
+            
+        if "file" in request.form:
+
+            files = request.files.getlist("file")
+        
+            for file in files:
+                path = os.path.dirname(file.filename)
+                filename = os.path.basename(file.filename)
+                basePath = os.path.join(app.config['UPLOAD_FOLDER'], "Media")
+                basePath = os.path.join(basePath, path)
+                if not os.path.exists(basePath):
+                    os.makedirs(basePath, exist_ok=True)          
+                file.save(os.path.join(basePath, utils.secure_filename(filename) ))
             
     if session['noDbError']  != 1:
-        inputPath = session['inputPath']               
-        counters, messages = ExtractInformation.GetPrivateChat(inputPath, mediaType, phoneNumber)
-        
-        return render_template('privateChat.html', phoneNumber=Service.FormatPhoneNumber(phoneNumber), nonFormattedNumber = phoneNumber, counters = counters, messages = messages, str=str, vcardTelExtractor = Service.VcardTelExtractor, originalPhoneNumber = phoneNumber, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, GetUserProfilePicImage = Service.GetUserProfilePicImage)
+        return redirect(url_for('PrivateChatFilters', mediaType=mediaType, phoneNumber=phoneNumber, dateBegin=session['dateBegin'], dateEnd=session['dateEnd'], searchKey=session['searchKey']))
     else:
         return redirect(url_for('Home'))
+
+@app.route('/privateChat/<mediaType>/<phoneNumber>/<dateBegin>_<dateEnd>_<searchKey>')
+def PrivateChatFilters(mediaType, phoneNumber, dateBegin, dateEnd, searchKey):
+            
+    if session['noDbError']  != 1:
+        session['dateBegin'] = dateBegin           
+        session['dateEnd']  = dateEnd                      
+        session['searchKey'] = searchKey       
+
+        inputPath = session['inputPath']               
+        counters, session['messages'] = ExtractInformation.GetPrivateChat(inputPath, mediaType, phoneNumber, dateBegin, dateEnd, searchKey)
+        
+        if session['searchKey'] == 'null':
+            searchKey = ''
+
+        return render_template('privateChat.html', phoneNumber=Service.FormatPhoneNumber(phoneNumber), nonFormattedNumber = phoneNumber, counters = counters, messages = session['messages'], str=str, vcardTelExtractor = Service.VcardTelExtractor, originalPhoneNumber = phoneNumber, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, GetUserProfilePicImage = Service.GetUserProfilePicImage, dateBegin=dateBegin, dateEnd=dateEnd, searchKey=searchKey)
+    else:
+        return redirect(url_for('Home'))
+
+
+@app.route('/groupChat/<mediaType>/<groupName>/<dateBegin>_<dateEnd>_<searchKey>', methods = ['GET', 'POST'])
+def GroupChatFilters(mediaType, groupName, dateBegin, dateEnd, searchKey):
+        
+    if session['noDbError']  != 1:
+        session['dateBegin'] = dateBegin           
+        session['dateEnd']  = dateEnd                      
+        session['searchKey'] = searchKey  
+        inputPath = session['inputPath']               
+        counters, groupId, session['messages'] = ExtractInformation.GetGroupChat(inputPath, mediaType, groupName, dateBegin, dateEnd, searchKey)
+        groupId = groupId[0]['ZCONTACTJID']
+
+        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = session['messages'], groupId = groupId, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage, dateBegin=dateBegin, dateEnd=dateEnd, searchKey=searchKey)
+    else:
+        return redirect(url_for('Home'))
+
 
 @app.route('/groupChat/<mediaType>/<groupName>', methods = ['GET', 'POST'])
 def GroupChat(mediaType, groupName):
 
     if request.method =='POST':
-        files = request.files.getlist("file")
         
-        for file in files:
-            path = os.path.dirname(file.filename)
-            filename = os.path.basename(file.filename)
-            basePath = os.path.join(app.config['UPLOAD_FOLDER'], "Media")
-            basePath = os.path.join(basePath, path)
-            if not os.path.exists(basePath):
-                os.makedirs(basePath, exist_ok=True)          
-            file.save(os.path.join(basePath, utils.secure_filename(filename) ))
+        if "file" in request.form:
 
+            files = request.files.getlist("file")
+        
+            for file in files:
+                path = os.path.dirname(file.filename)
+                filename = os.path.basename(file.filename)
+                basePath = os.path.join(app.config['UPLOAD_FOLDER'], "Media")
+                basePath = os.path.join(basePath, path)
+                if not os.path.exists(basePath):
+                    os.makedirs(basePath, exist_ok=True)          
+                file.save(os.path.join(basePath, utils.secure_filename(filename) ))
+        
+        if "dateBegin" in request.form:
+            session['dateBegin'] = request.form["dateBegin"] 
+               
+        if "dateEnd" in request.form:
+            session['dateEnd']  = request.form["dateEnd"] 
+                       
+        if "searchKey" in request.form:
+            session['searchKey'] = request.form["searchKey"]
+            
     if session['noDbError']  != 1:
-        inputPath = session['inputPath']               
-        counters, groupId, messages = ExtractInformation.GetGroupChat(inputPath, mediaType, groupName)
-        groupId = groupId[0]['ZCONTACTJID']
-
-        return render_template('groupChat.html', groupName=groupName, counters = counters, messages = messages, groupId = groupId, str=str, vcardTelExtractor = Service.VcardTelExtractor, GetSentDateTime=Service.GetSentDateTime, GetReadDateTime=Service.GetReadDateTime, FormatPhoneNumber=Service.FormatPhoneNumber, GetUserProfilePicImage = Service.GetUserProfilePicImage)
+        return redirect(url_for('GroupChatFilters', mediaType=mediaType, groupName=groupName, dateBegin=session['dateBegin'], dateEnd=session['dateEnd'], searchKey=session['searchKey']))
     else:
         return redirect(url_for('Home'))
 
@@ -407,91 +473,11 @@ def ChatListReport():
     else:
         return redirect(url_for('Home'))
 
-# @app.route('/availableBackups')
-# def AvailableBackups():
-
-#     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
-#     backupPath = backupPath.replace("\\", "/")
-
-#     backupList = Service.GetAvailableBackups()
-#     return render_template('availableBackup.html', backupList=backupList, backupPath=backupPath, extractionStatus=0, outputPath=OutputPath, noOutPathError=noOutPathError)
-
-# @app.route('/extractBackup/<deviceSn>/<udid>')
-# def ExtractBackup(deviceSn, udid):
-
-#     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
-#     backupPath = backupPath.replace("\\", "/")
-
-#     if session['noOutPathError']  == 0:
-#         backupList = Service.GetAvailableBackups()
-#         ExtractInformation.ExtractFullBackup(backupPath, udid, OutputPath)
-#         Service.RemoveFileWithoutExtension()
-
-#     else:
-#         return redirect(url_for('AvailableBackups'))
-
-#     if sys.platform.startswith('win'):
-#         # Windows
-#         os.system("start " + OutputPath)
-#     elif sys.platform.startswith('darwin'):
-#         # macOS
-#         os.system("open " + OutputPath)
-#     # elif sys.platform.startswith('linux'):
-#         # Linux
-
-#     return render_template('availableBackup.html', backupList=backupList, backupPath=backupPath, extractionStatus=1, deviceSn=deviceSn, udid=udid, outputPath=OutputPath, noOutPathError=noOutPathError)
-
-# @app.route('/insertPassword/<deviceSn>/<udid>')
-# def InsertPassword(deviceSn, udid):
-#     session['extractionDone '] = 0
-#     return render_template('insertPassword.html', deviceSn=deviceSn, udid=udid)
-
-# @app.route('/extractEncryptedBackup/<deviceSn>/<udid>', methods=["POST"])
-# def ExtractEncryptedBackup(deviceSn, udid):
-
-#     backupPath = os.path.expandvars(GlobalConstant.backupDefaultPath)
-#     backupPath = backupPath.replace("\\", "/")
-
-#     if session['noOutPathError']  == 0:
-#         backupList = Service.GetAvailableBackups()
-#         if request.method == "POST" and session['extractionDone '] == 0:
-#             backupPsw = request.form["password"]
-#             ExtractInformation.ExtractEncryptedFullBackup(backupPath, udid, OutputPath, backupPsw)
-#             Service.RemoveFileWithoutExtension()
-#             session['extractionDone '] = 1
-#         else:
-#             return redirect(url_for('AvailableBackups'))
-
-#     else:
-#         return redirect(url_for('AvailableBackups'))
-
-#     if sys.platform.startswith('win'):
-#         # Windows
-#         os.system("start " + OutputPath)
-#     elif sys.platform.startswith('darwin'):
-#         # macOS
-#         os.system("open " + OutputPath)
-#     # elif sys.platform.startswith('linux'):
-#         # Linux
-
-#     return render_template('availableBackup.html', backupList=backupList, backupPath=backupPath, extractionStatus=1, deviceSn=deviceSn, udid=udid, outputPath=OutputPath, noOutPathError=noOutPathError)
-
-# @app.route('/ExtractionOutPath')
-# def ExtractionOutPath():
-#     if app.config['UPLOAD_FOLDER'] == "":
-#         app.config['UPLOAD_FOLDER'] = InputPath.rsplit('/', 1)[0] + '/'
-#     else:
-#         app.config['UPLOAD_FOLDER'] = app.config['UPLOAD_FOLDER'] + '/'
-
-#     session['noOutPathError']  = 0
-
-#     return redirect(url_for('AvailableBackups'))
-
 @app.route('/generatePrivateChatReport/<phoneNumber>')
 def generatePrivateChatReport(phoneNumber):
 
-    counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
-    report, certificate = GenerateReport.PrivateChatReport(app.config['UPLOAD_FOLDER'], phoneNumber, messages)
+    # counters, messages = ExtractInformation.GetPrivateChat(session['inputPath'], '0', phoneNumber)
+    report, certificate = GenerateReport.PrivateChatReport(app.config['UPLOAD_FOLDER'], phoneNumber, session['messages'])
     
     basePath = os.path.join(app.config['UPLOAD_FOLDER'], 'Media')
     sha, certSha = GenerateReport.CalculateMediaSHA256(os.path.join( basePath, phoneNumber + "@s.whatsapp.net"), app.config['UPLOAD_FOLDER'], phoneNumber)
@@ -532,16 +518,15 @@ def generatePrivateChatReport(phoneNumber):
         
     return send_file(memory_file, mimetype='application/zip', as_attachment=True, download_name= phoneNumber + '-' + session['serialDb'] + ".zip")
 
-@app.route('/generateGroupChatReport/<groupName>')
-def generateGroupChatReport(groupName):
+@app.route('/generateGroupChatReport/<groupName>-<groupId>')
+def generateGroupChatReport(groupName, groupId):
 
     groupNameNoSpaces = groupName.replace(" ", "")
 
-    counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
-    report, certificate = GenerateReport.GroupChatReport(app.config['UPLOAD_FOLDER'], groupName, messages)
+    # counters, groupId, messages = ExtractInformation.GetGroupChat(session['inputPath'], '0', groupName)
+    report, certificate = GenerateReport.GroupChatReport(app.config['UPLOAD_FOLDER'], groupName, session['messages'])
     
     basePath = os.path.join(app.config['UPLOAD_FOLDER'], 'Media')
-    groupId = groupId[0]['ZCONTACTJID']
     sha, certSha = GenerateReport.CalculateMediaSHA256(os.path.join(basePath, groupId), app.config['UPLOAD_FOLDER'], groupNameNoSpaces)
     md5, certMd5 = GenerateReport.CalculateMediaMD5(os.path.join(basePath, groupId), app.config['UPLOAD_FOLDER'], groupNameNoSpaces)
 
