@@ -643,7 +643,7 @@
                                     <img style="border-radius: 50%; width: 45px; height: 100%" src="{{ GetUserProfilePicImage(item.user) }}" alt="avatar 1">
                                     {% if item.mediaPath is not none %}
                                     <a target="_blank" href="{{ '/data/' + item.mediaPath }}">
-                                        <audio controls class="received" style="margin-left:17px" src="{{ '/assets/' + str(item.mediaPath) }}"></audio>
+                                        <audio controls class="received" style="margin-left:17px" src="{{ '/data/' + str(item.mediaPath) }}"></audio>
                                     </a>
                                     {% elif item.mediaPath is none %}
                                     <audio controls class="received" style="margin-left:17px" src="#"></audio>
@@ -661,7 +661,7 @@
                                 <div class="d-flex flex-row justify-content-end mb-4">
                                     {% if item.mediaPath is not none %}
                                     <a target="_blank" href="{{ '/data/' + item.mediaPath }}">
-                                        <audio controls class="received" style="margin-left:17px" src="{{ '/assets/' + str(item.mediaPath) }}"></audio>
+                                        <audio controls class="received" style="margin-left:17px" src="{{ '/data/' + str(item.mediaPath) }}"></audio>
                                     </a>
                                     {% elif item.mediaPath is none %}
                                     <audio controls class="received" style="margin-left:17px" src="#"></audio>
@@ -957,7 +957,7 @@
                                             {% else %}
                                             <i class="fas fa-paperclip" style="color: #858796"></i>
                                             {% endif %}
-                                            <a href="/assets/{{ item.mediaPath }}" target="_blank">{{ item.text}}</a>
+                                            <a href="/media/{{ item.mediaPath }}" target="_blank">{{ item.text}}</a>
                                         </p>
                                     </div>
                                 </div>

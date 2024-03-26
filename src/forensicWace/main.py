@@ -72,7 +72,7 @@ def Home():
   
             if(file_time < time.time() - 1800): 
                 print(f" Delete : {i}")
-                if os.path.isfile():
+                if os.path.isfile(file_location):
                     os.remove(file_location) 
 
     return render_template('index.html', inputPath=session['serialDb'], outputPath=app.config['UPLOAD_FOLDER'], fileName=session['fileName'], fileSize=session['fileSize'], dbSha256=session['dbSha256'], dbMd5=session['dbMd5'], noDbError=session['noDbError'], noOutPathError=session['noOutPathError'])
@@ -293,7 +293,7 @@ def PrivateChat(mediaType, phoneNumber):
         if "searchKey" in request.form:
             session['searchKey'] = request.form["searchKey"]
             
-        if "file" in request.form:
+        if "file" in request.files:
 
             files = request.files.getlist("file")
         
@@ -351,7 +351,7 @@ def GroupChat(mediaType, groupName):
 
     if request.method =='POST':
         
-        if "file" in request.form:
+        if "file" in request.files:
 
             files = request.files.getlist("file")
         

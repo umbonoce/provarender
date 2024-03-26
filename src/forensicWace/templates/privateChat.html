@@ -27,7 +27,7 @@
                     <form action="/privateChat/0/{{ originalPhoneNumber }}" method="POST"
                           enctype="multipart/form-data">
                         <label for="myPrivateChat">
-                            <a class="btn btn-block btn-warning btn-icon-split"><span class="text-white-50 icon"><i class="fas  fa-folder-open"></i></span> <span class="text-white text">UPLOAD {{ phoneNumber }}@s.whatsapp.net MEDIA FOLDER TO EXPORT ALSO MEDIAS</span></a>
+                            <a class="btn btn-block btn-warning btn-icon-split"><span class="text-white-50 icon"><i class="fas  fa-folder-open"></i></span> <span class="text-white text">UPLOAD {{ nonFormattedNumber }}@s.whatsapp.net MEDIA FOLDER TO EXPORT ALSO MEDIAS</span></a>
                             <input id="myPrivateChat" style="display:none" onchange="form.submit()" type="file" name="file" webkitdirectory directory multiple />
                         </label>
                     </form>
@@ -595,7 +595,7 @@
                                     <img style="border-radius: 50%; width: 45px; height: 100%" src="{{ GetUserProfilePicImage(item.user) }}" alt="avatar 1">
                                     {% if item.mediaPath is not none %}
                                     <a target="_blank" href="{{ '/data/' + item.mediaPath }}">
-                                        <audio controls class="received" style="margin-left:17px" src="{{ '/assets/' + str(item.mediaPath) }}"></audio>
+                                        <audio controls class="received" style="margin-left:17px" src="{{ '/data/' + str(item.mediaPath) }}"></audio>
                                     </a>
                                     {% elif item.mediaPath is none %}
                                     <audio controls class="received" style="margin-left:17px" src="#"></audio>
@@ -613,7 +613,7 @@
                                 <div class="d-flex flex-row justify-content-end mb-4">
                                     {% if item.mediaPath is not none %}
                                     <a target="_blank" href="{{ '/data/' + item.mediaPath }}">
-                                        <audio controls class="received" style="margin-left:17px" src="{{ '/assets/' + str(item.mediaPath) }}"></audio>
+                                        <audio controls class="received" style="margin-left:17px" src="{{ '/data/' + str(item.mediaPath) }}"></audio>
                                     </a>
                                     {% elif item.mediaPath is none %}
                                     <audio controls class="received" style="margin-left:17px" src="#"></audio>
