@@ -570,14 +570,7 @@ def About():
 
 @app.route('/exit')
 def Exit():
-    session['serialDb'] = GlobalConstant.noDatabaseSelected
-    session['inputPath'] = GlobalConstant.noDatabaseSelected
-    session['fileName'] = GlobalConstant.noDatabaseSelected
-    session['fileSize'] = GlobalConstant.noDatabaseSelected
-    session['dbSha256'] = GlobalConstant.noDatabaseSelected
-    session['dbMd5']  = GlobalConstant.noDatabaseSelected
-    session['noDbError']  = 1
-    session['noOutPathError']  = 1
+    session.clear()
 
     return redirect(url_for('Home'))
 
