@@ -385,7 +385,7 @@ def CheckReport():
     if (session['reportPath'] != GlobalConstant.noReportSelected and session['certificatePath']  != GlobalConstant.noCertificateSelected):
         session['reportStatus']  = Service.ReportCheckAuth(session['reportPath'], session['certificatePath'])
 
-    return render_template('checkReport.html', reportPath=session['reportPath'], certificatePath=session['certificatePath'], reportStatus=session['reportStatus'])
+    return render_template('checkReport.html', reportPath=session['reportPath'], certificatePath=os.path.basename(session['certificatePath']), reportStatus=os.path.basename(session['reportStatus']))
 
 @app.route('/reportPath', methods = ['GET', 'POST'])
 def ReportPath():
